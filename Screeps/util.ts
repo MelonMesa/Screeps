@@ -69,7 +69,13 @@ module Util {
             return obj;
         }
         else {
-            return Game.getObjectById<T>(creep.memory[memoryname]);
+            var obj = Game.getObjectById<T>(creep.memory[memoryname]);
+            if (obj == null) {
+                creep.memory[memoryname] = null;
+                return QuickFindAny<T>(creep, type, memoryname, opts);
+            }
+
+            return obj;
         }
     }
 }

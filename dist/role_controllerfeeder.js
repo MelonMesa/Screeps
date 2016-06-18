@@ -1,10 +1,5 @@
 /// <reference path="screeps.d.ts" />
 "use strict";
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -12,7 +7,6 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 var util = require("./util");
-var RoomActor = require("./RoomActor");
 var Role;
 (function (Role) {
     var ControllerFeeder;
@@ -33,10 +27,8 @@ var Role;
             return util.spawnCreep(ControllerFeeder_1.role, spawnName, creepName);
         }
         ControllerFeeder_1.spawn = spawn;
-        var ControllerFeeder = (function (_super) {
-            __extends(ControllerFeeder, _super);
+        var ControllerFeeder = (function () {
             function ControllerFeeder() {
-                _super.apply(this, arguments);
             }
             /**
              * Runs the controller-feeder role
@@ -59,7 +51,7 @@ var Role;
                 util.creepTicker(ControllerFeeder_1.role)
             ], ControllerFeeder, "run", null);
             return ControllerFeeder;
-        }(RoomActor));
+        }());
     })(ControllerFeeder = Role.ControllerFeeder || (Role.ControllerFeeder = {}));
 })(Role || (Role = {}));
 module.exports = Role.ControllerFeeder;

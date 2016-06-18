@@ -44,6 +44,24 @@ var Util;
         };
     }
     Util.creepTicker = creepTicker;
+    function QuickFindAny(creep, type, memoryname, opts) {
+        if (!creep.memory[memoryname]) {
+            var obj_1 = creep.room.find(type, opts)[0];
+            if (obj_1 == null)
+                return null;
+            creep.memory[memoryname] = obj_1["id"];
+            return obj_1;
+        }
+        else {
+            var obj = Game.getObjectById(creep.memory[memoryname]);
+            if (obj == null) {
+                creep.memory[memoryname] = null;
+                return QuickFindAny(creep, type, memoryname, opts);
+            }
+            return obj;
+        }
+    }
+    Util.QuickFindAny = QuickFindAny;
 })(Util || (Util = {}));
 module.exports = Util;
 //# sourceMappingURL=util.js.map
