@@ -1,11 +1,12 @@
 ﻿{
-    "compilerOptions": {
-        "module": "commonjs",
-        "noImplicitAny": true,
-        "preserveConstEnums": true,
-      "sourceMap": true,
-        "target": "es5"
-    },
+  "compilerOptions": {
+    "module": "commonjs",
+    "noImplicitAny": true,
+    "preserveConstEnums": true,
+    "sourceMap": true,
+    "target": "es5",
+    "experimentalDecorators": true
+  },
   "exclude": [
     "node_modules"
   ]

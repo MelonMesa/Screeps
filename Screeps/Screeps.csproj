@@ -31,6 +31,7 @@
     <TypeScriptCompile Include="main.ts" />
     <TypeScriptCompile Include="role_harvester.ts" />
     <TypeScriptCompile Include="screeps.d.ts" />
+    <TypeScriptCompile Include="util.ts" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">12.0</VisualStudioVersion>
@@ -72,6 +73,8 @@
     <TypeScriptNoEmitOnError>True</TypeScriptNoEmitOnError>
     <TypeScriptMapRoot />
     <TypeScriptSourceRoot />
+    <DefineConstants>
+    </DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <TypeScriptRemoveComments>true</TypeScriptRemoveComments>
