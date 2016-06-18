@@ -46,14 +46,19 @@ var Util;
     Util.creepTicker = creepTicker;
     function QuickFindAny(creep, type, memoryname, opts) {
         if (!creep.memory[memoryname]) {
-            var obj = creep.room.find(type, opts)[0];
-            if (obj == null)
+            var obj_1 = creep.room.find(type, opts)[0];
+            if (obj_1 == null)
                 return null;
-            creep.memory[memoryname] = obj["id"];
-            return obj;
+            creep.memory[memoryname] = obj_1["id"];
+            return obj_1;
         }
         else {
-            return Game.getObjectById(creep.memory[memoryname]);
+            var obj = Game.getObjectById(creep.memory[memoryname]);
+            if (obj == null) {
+                creep.memory[memoryname] = null;
+                return QuickFindAny(creep, type, memoryname, opts);
+            }
+            return obj;
         }
     }
     Util.QuickFindAny = QuickFindAny;

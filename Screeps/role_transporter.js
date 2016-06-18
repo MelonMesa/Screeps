@@ -16,7 +16,7 @@ var Role;
         **/
         Transporter_1.role = {
             name: "transporter",
-            body: [CARRY, MOVE]
+            body: [CARRY, MOVE, MOVE]
         };
         /**
          * Spawns a harvester creep.
