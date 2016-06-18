@@ -1,10 +1,5 @@
 /// <reference path="screeps.d.ts" />
 "use strict";
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -12,7 +7,6 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 var util = require("./util");
-var RoomActor = require("./RoomActor");
 var Role;
 (function (Role) {
     var SourceMiner;
@@ -33,18 +27,15 @@ var Role;
             return util.spawnCreep(SourceMiner_1.role, spawnName, creepName);
         }
         SourceMiner_1.spawn = spawn;
-        var SourceMiner = (function (_super) {
-            __extends(SourceMiner, _super);
+        var SourceMiner = (function () {
             function SourceMiner() {
-                _super.apply(this, arguments);
             }
             /**
              * Runs the harvester role
              * @param creep
             **/
             SourceMiner.run = function (creep) {
-                _super.run.call(this, creep);
-                var source = RoomActor.QuickFindAny(creep, FIND_SOURCES, "minesource");
+                var source = util.QuickFindAny(creep, FIND_SOURCES, "minesource");
                 if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(source);
                 }
@@ -53,7 +44,7 @@ var Role;
                 util.creepTicker(SourceMiner_1.role)
             ], SourceMiner, "run", null);
             return SourceMiner;
-        }(RoomActor));
+        }());
     })(SourceMiner = Role.SourceMiner || (Role.SourceMiner = {}));
 })(Role || (Role = {}));
 module.exports = Role.SourceMiner;

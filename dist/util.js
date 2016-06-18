@@ -44,6 +44,19 @@ var Util;
         };
     }
     Util.creepTicker = creepTicker;
+    function QuickFindAny(creep, type, memoryname, opts) {
+        if (!creep.memory[memoryname]) {
+            var obj = creep.room.find(type, opts)[0];
+            if (obj == null)
+                return null;
+            creep.memory[memoryname] = obj["id"];
+            return obj;
+        }
+        else {
+            return Game.getObjectById(creep.memory[memoryname]);
+        }
+    }
+    Util.QuickFindAny = QuickFindAny;
 })(Util || (Util = {}));
 module.exports = Util;
 //# sourceMappingURL=util.js.map
