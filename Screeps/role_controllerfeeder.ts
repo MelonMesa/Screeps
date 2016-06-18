@@ -1,6 +1,7 @@
 ﻿/// <reference path="screeps.d.ts" />
 
 import util = require("./util");
+import RoomActor = require("./RoomActor");
 
 module Role.ControllerFeeder {
     /**
@@ -21,13 +22,13 @@ module Role.ControllerFeeder {
         return util.spawnCreep(role, spawnName, creepName);
     }
 
-    class ControllerFeeder {
+    class ControllerFeeder extends RoomActor {
         /**
          * Runs the controller-feeder role
          * @param creep
         **/
         @util.creepTicker(role)
-        private static run(creep: Creep) {
+        protected static run(creep: Creep) {
             if (creep.carry.energy > 0) {
                 const controller = creep.room.controller;
                 if (creep.upgradeController(controller) == ERR_NOT_IN_RANGE) {

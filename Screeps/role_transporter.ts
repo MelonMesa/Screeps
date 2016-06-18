@@ -3,14 +3,14 @@
 import util = require("./util");
 import RoomActor = require("./RoomActor");
 
-module Role.Harvester {
+module Role.Transporter {
     /**
      * Details for the "harvester" role.
     **/
     export const role: util.RoleDetails =
         {
-            name: "harvester",
-            body: [WORK, CARRY, MOVE]
+            name: "transporter",
+            body: [CARRY, MOVE]
         };
 
     /**
@@ -22,17 +22,21 @@ module Role.Harvester {
         return util.spawnCreep(role, spawnName, creepName);
     }
 
-    class Harvester extends RoomActor {
+    class Transporter extends RoomActor {
         /**
          * Runs the harvester role
          * @param creep
         **/
         @util.creepTicker(role)
         protected static run(creep: Creep) {
-            if (creep.carry.energy < creep.carryCapacity) {
-                const source = RoomActor.QuickFindAny<Source>(creep, FIND_SOURCES, "minesource");
-                if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(source);
+
+            const energyresource = RoomActor.QuickFindAny<Resource>(creep, FIND_DROPPED_RESOURCES, "transportsource", {
+                filter: { resourceType: RESOURCE_ENERGY }
+            });
+
+            if (creep.carry.energy < creep.carryCapacity && energyresource) {
+                if (creep.pickup(energyresource) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(energyresource);
                 }
             }
             else {
@@ -45,4 +49,4 @@ module Role.Harvester {
     }
 }
 
-export = Role.Harvester;
+export = Role.Transporter;

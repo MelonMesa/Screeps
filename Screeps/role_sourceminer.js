@@ -15,14 +15,14 @@ var util = require("./util");
 var RoomActor = require("./RoomActor");
 var Role;
 (function (Role) {
-    var Harvester;
-    (function (Harvester_1) {
+    var SourceMiner;
+    (function (SourceMiner_1) {
         /**
          * Details for the "harvester" role.
         **/
-        Harvester_1.role = {
-            name: "harvester",
-            body: [WORK, CARRY, MOVE]
+        SourceMiner_1.role = {
+            name: "miner",
+            body: [WORK, MOVE]
         };
         /**
          * Spawns a harvester creep.
@@ -30,38 +30,31 @@ var Role;
          * @param creepName
         **/
         function spawn(spawnName, creepName) {
-            return util.spawnCreep(Harvester_1.role, spawnName, creepName);
+            return util.spawnCreep(SourceMiner_1.role, spawnName, creepName);
         }
-        Harvester_1.spawn = spawn;
-        var Harvester = (function (_super) {
-            __extends(Harvester, _super);
-            function Harvester() {
+        SourceMiner_1.spawn = spawn;
+        var SourceMiner = (function (_super) {
+            __extends(SourceMiner, _super);
+            function SourceMiner() {
                 _super.apply(this, arguments);
             }
             /**
              * Runs the harvester role
              * @param creep
             **/
-            Harvester.run = function (creep) {
-                if (creep.carry.energy < creep.carryCapacity) {
-                    var source = RoomActor.QuickFindAny(creep, FIND_SOURCES, "minesource");
-                    if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
-                        creep.moveTo(source);
-                    }
-                }
-                else {
-                    var spawndropsite = RoomActor.QuickFindAny(creep, FIND_MY_SPAWNS, "transportspawn");
-                    if (creep.transfer(spawndropsite, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                        creep.moveTo(Game.spawns["Spawn1"]);
-                    }
+            SourceMiner.run = function (creep) {
+                _super.run.call(this, creep);
+                var source = RoomActor.QuickFindAny(creep, FIND_SOURCES, "minesource");
+                if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(source);
                 }
             };
             __decorate([
-                util.creepTicker(Harvester_1.role)
-            ], Harvester, "run", null);
-            return Harvester;
+                util.creepTicker(SourceMiner_1.role)
+            ], SourceMiner, "run", null);
+            return SourceMiner;
         }(RoomActor));
-    })(Harvester = Role.Harvester || (Role.Harvester = {}));
+    })(SourceMiner = Role.SourceMiner || (Role.SourceMiner = {}));
 })(Role || (Role = {}));
-module.exports = Role.Harvester;
-//# sourceMappingURL=role_harvester.js.map
+module.exports = Role.SourceMiner;
+//# sourceMappingURL=role_sourceminer.js.map

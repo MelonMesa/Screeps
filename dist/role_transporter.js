@@ -15,52 +15,55 @@ var util = require("./util");
 var RoomActor = require("./RoomActor");
 var Role;
 (function (Role) {
-    var ControllerFeeder;
-    (function (ControllerFeeder_1) {
+    var Transporter;
+    (function (Transporter_1) {
         /**
-         * Details for the "controllerfeeder" role.
+         * Details for the "harvester" role.
         **/
-        ControllerFeeder_1.role = {
-            name: "controllerfeeder",
-            body: [WORK, CARRY, MOVE]
+        Transporter_1.role = {
+            name: "transporter",
+            body: [CARRY, MOVE]
         };
         /**
-         * Spawns a controller-feeder creep.
+         * Spawns a harvester creep.
          * @param spawnName
          * @param creepName
         **/
         function spawn(spawnName, creepName) {
-            return util.spawnCreep(ControllerFeeder_1.role, spawnName, creepName);
+            return util.spawnCreep(Transporter_1.role, spawnName, creepName);
         }
-        ControllerFeeder_1.spawn = spawn;
-        var ControllerFeeder = (function (_super) {
-            __extends(ControllerFeeder, _super);
-            function ControllerFeeder() {
+        Transporter_1.spawn = spawn;
+        var Transporter = (function (_super) {
+            __extends(Transporter, _super);
+            function Transporter() {
                 _super.apply(this, arguments);
             }
             /**
-             * Runs the controller-feeder role
+             * Runs the harvester role
              * @param creep
             **/
-            ControllerFeeder.run = function (creep) {
-                if (creep.carry.energy > 0) {
-                    var controller = creep.room.controller;
-                    if (creep.upgradeController(controller) == ERR_NOT_IN_RANGE) {
-                        creep.moveTo(controller);
+            Transporter.run = function (creep) {
+                var energyresource = RoomActor.QuickFindAny(creep, FIND_DROPPED_RESOURCES, "transportsource", {
+                    filter: { resourceType: RESOURCE_ENERGY }
+                });
+                if (creep.carry.energy < creep.carryCapacity && energyresource) {
+                    if (creep.pickup(energyresource) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(energyresource);
                     }
                 }
                 else {
-                    if (Game.spawns["Spawn1"].transferEnergy(creep) == ERR_NOT_IN_RANGE) {
+                    var spawndropsite = RoomActor.QuickFindAny(creep, FIND_MY_SPAWNS, "transportspawn");
+                    if (creep.transfer(spawndropsite, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                         creep.moveTo(Game.spawns["Spawn1"]);
                     }
                 }
             };
             __decorate([
-                util.creepTicker(ControllerFeeder_1.role)
-            ], ControllerFeeder, "run", null);
-            return ControllerFeeder;
+                util.creepTicker(Transporter_1.role)
+            ], Transporter, "run", null);
+            return Transporter;
         }(RoomActor));
-    })(ControllerFeeder = Role.ControllerFeeder || (Role.ControllerFeeder = {}));
+    })(Transporter = Role.Transporter || (Role.Transporter = {}));
 })(Role || (Role = {}));
-module.exports = Role.ControllerFeeder;
-//# sourceMappingURL=role_controllerfeeder.js.map
+module.exports = Role.Transporter;
+//# sourceMappingURL=role_transporter.js.map
