@@ -1,7 +1,6 @@
 ﻿/// <reference path="screeps.d.ts" />
 
 import util = require("./util");
-import RoomActor = require("./RoomActor");
 
 module Role.ControllerFeeder {
     /**
@@ -22,7 +21,7 @@ module Role.ControllerFeeder {
         return util.spawnCreep(role, spawnName, creepName);
     }
 
-    class ControllerFeeder extends RoomActor {
+    class ControllerFeeder {
         /**
          * Runs the controller-feeder role
          * @param creep

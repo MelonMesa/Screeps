@@ -41,7 +41,7 @@ module Role.Transporter {
             else {
                 const spawndropsite = util.QuickFindAny<Spawn>(creep, FIND_MY_SPAWNS, "transportspawn");
                 if (creep.transfer(spawndropsite, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(Game.spawns["Spawn1"]);
+                    creep.moveTo(spawndropsite);
                 }
             }
         }
