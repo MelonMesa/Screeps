@@ -1,11 +1,14 @@
 ﻿/// <reference path="screeps.d.ts" />
 
-const roleHarvester = require('role.harvester');
+import roleHarvester = require('./role_harvester');
 
-module.exports.loop = () => {
-
-    for (var name in Game.creeps) {
-        var creep = Game.creeps[name];
-        roleHarvester.run(creep);
+module Main {
+    export function loop() {
+        for (var name in Game.creeps) {
+            var creep = Game.creeps[name];
+            roleHarvester.run(creep);
+        }
     }
 }
+
+export = Main;
