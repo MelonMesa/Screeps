@@ -31,7 +31,7 @@ module Util {
      * @param error
     **/
     export function logError(error: string | Error): void {
-        console.error(error);
+        console.log(error);
     }
 
     /**
