@@ -1,7 +1,6 @@
 ﻿/// <reference path="screeps.d.ts" />
 
 import util = require("./util");
-import RoomActor = require("./RoomActor");
 
 module Role.Harvester {
     /**
@@ -22,7 +21,7 @@ module Role.Harvester {
         return util.spawnCreep(role, spawnName, creepName);
     }
 
-    class Harvester extends RoomActor {
+    class Harvester {
         /**
          * Runs the harvester role
          * @param creep
@@ -30,13 +29,13 @@ module Role.Harvester {
         @util.creepTicker(role)
         protected static run(creep: Creep) {
             if (creep.carry.energy < creep.carryCapacity) {
-                const source = RoomActor.QuickFindAny<Source>(creep, FIND_SOURCES, "minesource");
+                const source = util.QuickFindAny<Source>(creep, FIND_SOURCES, "minesource");
                 if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(source);
                 }
             }
             else {
-                const spawndropsite = RoomActor.QuickFindAny<Spawn>(creep, FIND_MY_SPAWNS, "transportspawn");
+                const spawndropsite = util.QuickFindAny<Spawn>(creep, FIND_MY_SPAWNS, "transportspawn");
                 if (creep.transfer(spawndropsite, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(Game.spawns["Spawn1"]);
                 }

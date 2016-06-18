@@ -1,7 +1,6 @@
 ﻿/// <reference path="screeps.d.ts" />
 
 import util = require("./util");
-import RoomActor = require("./RoomActor");
 
 module Role.SourceMiner {
     /**
@@ -22,16 +21,14 @@ module Role.SourceMiner {
         return util.spawnCreep(role, spawnName, creepName);
     }
 
-    class SourceMiner extends RoomActor {
+    class SourceMiner {
         /**
          * Runs the harvester role
          * @param creep
         **/
         @util.creepTicker(role)
         protected static run(creep: Creep) {
-            super.run(creep);
-
-            const source = RoomActor.QuickFindAny<Source>(creep, FIND_SOURCES, "minesource");
+            const source = util.QuickFindAny<Source>(creep, FIND_SOURCES, "minesource");
             if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(source);
             }
