@@ -1,7 +1,11 @@
 /// <reference path="screeps.d.ts" />
 "use strict";
 var util = require("./util");
+<<<<<<< HEAD
 var activeRoles = ["harvester", "controllerfeeder", "transporter", "sourceminer"];
+=======
+var activeRoles = ["harvester", "controllerfeeder", "builder"];
+>>>>>>> 9998373d5ff5d9fef29466b68e78aad159ebacbf
 for (var i = 0; i < activeRoles.length; i++) {
     require("./role_" + activeRoles[i]);
 }

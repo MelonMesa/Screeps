@@ -29,6 +29,7 @@
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="main.ts" />
+    <TypeScriptCompile Include="role_builder.ts" />
     <TypeScriptCompile Include="role_controllerfeeder.ts" />
     <TypeScriptCompile Include="role_harvester.ts" />
     <TypeScriptCompile Include="role_sourceminer.ts" />

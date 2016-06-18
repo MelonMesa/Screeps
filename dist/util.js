@@ -11,7 +11,7 @@ var Util;
      * @param error
     **/
     function logError(error) {
-        console.error(error);
+        console.log(error);
     }
     Util.logError = logError;
     /**
