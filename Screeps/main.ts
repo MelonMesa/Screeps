@@ -2,7 +2,7 @@
 
 import util = require("./util");
 
-const activeRoles = ["harvester", "controllerfeeder", "transporter", "sourceminer"];
+const activeRoles = ["harvester", "controllerfeeder", "builder", "transporter", "sourceminer"];
 for (var i = 0; i < activeRoles.length; i++) {
     require(`./role_${activeRoles[i]}`);
 }
