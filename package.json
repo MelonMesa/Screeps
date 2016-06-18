@@ -1,0 +1,9 @@
+{
+  "name": "melonmesa-screeps",
+  "author": "melonmesa",
+  "dependencies": {
+    "grunt": "^1.0.1",
+    "grunt-screeps": "^1.2.1",
+    "screeps-typescript-declarations": "^2.0.0"
+  }
+}
