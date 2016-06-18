@@ -1,6 +1,10 @@
 /// <reference path="screeps.d.ts" />
 "use strict";
 var util = require("./util");
+var activeRoles = ["harvester", "controllerfeeder"];
+for (var i = 0; i < activeRoles.length; i++) {
+    require("./role_" + activeRoles[i]);
+}
 var Main;
 (function (Main) {
     /**
@@ -15,7 +19,12 @@ var Main;
             var mem = creep.memory;
             var roleInfo = util.roles[mem.role];
             // Tick
-            roleInfo.ticker(creep);
+            if (roleInfo) {
+                roleInfo.ticker(creep);
+            }
+            else {
+                console.log("Unknown role " + mem.role);
+            }
         }
     }
     Main.loop = loop;

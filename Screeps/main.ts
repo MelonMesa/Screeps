@@ -2,6 +2,11 @@
 
 import util = require("./util");
 
+const activeRoles = ["harvester", "controllerfeeder"];
+for (var i = 0; i < activeRoles.length; i++) {
+    require(`./role_${activeRoles[i]}`);
+}
+
 module Main {
     /**
      * Main game loop.
@@ -17,7 +22,11 @@ module Main {
             const roleInfo = util.roles[mem.role];
             
             // Tick
-            roleInfo.ticker(creep);
+            if (roleInfo) {
+                roleInfo.ticker(creep);
+            } else {
+                console.log(`Unknown role ${mem.role}`);
+            }
         }
     }
 }
