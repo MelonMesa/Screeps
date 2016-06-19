@@ -7,25 +7,31 @@ for (var i = 0; i < activeRoles.length; i++) {
     require(`./role_${activeRoles[i]}`);
 }
 
+import spawnController = require("./SpawnController");
+
 module Main {
     /**
      * Main game loop.
     **/
     export function loop() {
+        // Spawn control
+        spawnController.doSpawnLogic();
+
         // Iterate all creeps
         for (var name in Game.creeps) {
             // Get creep
             const creep = Game.creeps[name];
+            if (!creep.spawning) {
+                // Get memory and role
+                const mem: util.CreepMemory = creep.memory;
+                const roleInfo = util.roles[mem.role];
 
-            // Get memory and role
-            const mem: util.CreepMemory = creep.memory;
-            const roleInfo = util.roles[mem.role];
-            
-            // Tick
-            if (roleInfo) {
-                roleInfo.ticker(creep);
-            } else {
-                console.log(`Unknown role ${mem.role}`);
+                // Tick
+                if (roleInfo) {
+                    roleInfo.ticker(creep);
+                } else {
+                    console.log(`Unknown role ${mem.role}`);
+                }
             }
         }
     }
