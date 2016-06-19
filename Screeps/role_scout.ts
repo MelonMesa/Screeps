@@ -21,6 +21,10 @@ module Role.Scout {
         return util.spawnCreep(role, spawnName, creepName);
     }
 
+    export function scout(creepName: string, x: number, y: number, roomName: string) {
+        Game.creeps[creepName].memory["target"] = new RoomPosition(x, y, roomName);
+    }
+
     interface ScoutMemory extends util.CreepMemory {
         target?: string;
     }
@@ -36,22 +40,12 @@ module Role.Scout {
         **/
         @util.creepTicker(role)
         protected static run(creep: Creep) {
-
-            const memory: ScoutMemory = creep.memory;
-            if (memory.target == null) {
-                const target = Scout.findTarget();
-                if (target == null) {
-                    return;
+            if (creep.memory.target) {
+                if (!creep.pos.isEqualTo(creep.memory.target)) {
+                    creep.moveTo(new RoomPosition(creep.memory.target.x, creep.memory.target.y, creep.memory.target.roomName));
+                } else {
+                    creep.memory[`${creep.memory.target.name}_scouted_creeps_memory`] = creep.room.find<CreepMemory>(FIND_CREEPS);
                 }
-                memory.target = target.id;
-            }
-
-            const target = Game.getObjectById<Flag>(memory.target);
-            console.log(target.id);
-            if (!creep.pos.isEqualTo(target)) {
-                creep.moveTo(target.pos);
-            } else {
-                creep.memory[`${target.name}_scouted_creeps_memory`] = creep.room.find<CreepMemory>(FIND_CREEPS);
             }
         }
 
