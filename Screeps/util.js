@@ -44,7 +44,11 @@ var Util;
         };
     }
     Util.creepTicker = creepTicker;
-    function QuickFindAny(creep, type, memoryname, opts, sustain) {
+    function isFunction(functionToCheck) {
+        var getType = {};
+        return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
+    }
+    function QuickFindAny(creep, type, memoryname, opts) {
         if (!creep.memory[memoryname]) {
             var obj_1 = creep.room.find(type, opts)[0];
             if (obj_1 == null)
@@ -54,9 +58,9 @@ var Util;
         }
         else {
             var obj = Game.getObjectById(creep.memory[memoryname]);
-            if (obj == null || (!sustain || sustain(obj))) {
+            if (obj == null || (!opts || (isFunction(opts.filter)) && opts.filter(obj))) {
                 creep.memory[memoryname] = null;
-                return QuickFindAny(creep, type, memoryname, opts, sustain);
+                return QuickFindAny(creep, type, memoryname, opts);
             }
             return obj;
         }

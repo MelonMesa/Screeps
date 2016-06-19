@@ -44,9 +44,9 @@ var Role;
                 else {
                     var pickupsite = util.QuickFindAny(creep, FIND_MY_STRUCTURES, "feederspawn", {
                         filter: function (structure) {
-                            return ((structure.structureType == STRUCTURE_EXTENSION && structure.energy > 0));
+                            return (structure.structureType == STRUCTURE_EXTENSION && structure.energy > 0);
                         }
-                    }, function (structure) { return structure.energy > 0; });
+                    });
                     if (pickupsite) {
                         if (pickupsite.structureType == STRUCTURE_EXTENSION) {
                             if (pickupsite.transferEnergy(creep) == ERR_NOT_IN_RANGE) {

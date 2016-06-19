@@ -61,12 +61,12 @@ module Util {
         };
     }
 
-
-    interface ObjectTester {
-        (object: any): boolean;
+    function isFunction(functionToCheck) {
+        var getType = {};
+        return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
     }
 
-    export function QuickFindAny<T>(creep: Creep, type: number, memoryname: string, opts?: { filter: any | string; }, sustain?: ObjectTester): T {
+    export function QuickFindAny<T>(creep: Creep, type: number, memoryname: string, opts?: { filter: any | string; }): T {
         if (!creep.memory[memoryname]) {
             const obj = creep.room.find<T>(type, opts)[0];
             if (obj == null) return null;
@@ -75,9 +75,9 @@ module Util {
         }
         else {
             var obj = Game.getObjectById<T>(creep.memory[memoryname]);
-            if (obj == null || (!sustain || sustain(obj))) {
+            if (obj == null || (!opts || (isFunction(opts.filter)) && opts.filter(obj))) {
                 creep.memory[memoryname] = null;
-                return QuickFindAny<T>(creep, type, memoryname, opts, sustain);
+                return QuickFindAny<T>(creep, type, memoryname, opts);
             }
 
             return obj;

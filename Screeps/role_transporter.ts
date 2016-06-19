@@ -45,17 +45,14 @@ module Role.Transporter {
                 if (!spawndropsite) return;
 
                 if (spawndropsite.energy >= spawndropsite.energyCapacity) {
-
                     // Need lodash.sum for structure.store
                     // ((structure.structureType == STRUCTURE_STORAGE || structure.structuretype == STRUCTURE_CONTAINER) && structure.store < structure.storeCapacity)
                     const dropsite = util.QuickFindAny<Structure>(creep, FIND_MY_STRUCTURES, "transportdropsite", {
                         filter: (structure) => {
-                            return ((structure.structureType == STRUCTURE_EXTENSION && structure.energy < structure.energyCapacity) ||
-                                ((structure.structureType == STRUCTURE_STORAGE || structure.structuretype == STRUCTURE_CONTAINER) && structure.store.energy < structure.storeCapacity));
+                            return (structure.structureType == STRUCTURE_EXTENSION && structure.energy < structure.energyCapacity) ||
+                                ((structure.structureType == STRUCTURE_STORAGE || structure.structuretype == STRUCTURE_CONTAINER) && structure.store.energy < structure.storeCapacity);
                         }
-                    }, (structure) => (structure.structureType == STRUCTURE_EXTENSION && (structure.energy < structure.energyCapacity)) ||
-                        ((structure.structureType == STRUCTURE_STORAGE || structure.structuretype == STRUCTURE_CONTAINER) && structure.store.energy < structure.storeCapacity)
-                    );
+                    });
 
                     if (creep.transfer(dropsite, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                         creep.moveTo(dropsite);

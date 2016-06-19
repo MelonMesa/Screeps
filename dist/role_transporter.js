@@ -54,11 +54,10 @@ var Role;
                         // ((structure.structureType == STRUCTURE_STORAGE || structure.structuretype == STRUCTURE_CONTAINER) && structure.store < structure.storeCapacity)
                         var dropsite = util.QuickFindAny(creep, FIND_MY_STRUCTURES, "transportdropsite", {
                             filter: function (structure) {
-                                return ((structure.structureType == STRUCTURE_EXTENSION && structure.energy < structure.energyCapacity) ||
-                                    ((structure.structureType == STRUCTURE_STORAGE || structure.structuretype == STRUCTURE_CONTAINER) && structure.store.energy < structure.storeCapacity));
+                                return (structure.structureType == STRUCTURE_EXTENSION && structure.energy < structure.energyCapacity) ||
+                                    ((structure.structureType == STRUCTURE_STORAGE || structure.structuretype == STRUCTURE_CONTAINER) && structure.store.energy < structure.storeCapacity);
                             }
-                        }, function (structure) { return (structure.structureType == STRUCTURE_EXTENSION && (structure.energy < structure.energyCapacity)) ||
-                            ((structure.structureType == STRUCTURE_STORAGE || structure.structuretype == STRUCTURE_CONTAINER) && structure.store.energy < structure.storeCapacity); });
+                        });
                         if (creep.transfer(dropsite, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                             creep.moveTo(dropsite);
                         }
