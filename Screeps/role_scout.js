@@ -27,6 +27,10 @@ var Role;
             return util.spawnCreep(Scout_1.role, spawnName, creepName);
         }
         Scout_1.spawn = spawn;
+        function scout(creepName, x, y, roomName) {
+            Game.creeps[creepName].memory["target"] = new RoomPosition(x, y, roomName);
+        }
+        Scout_1.scout = scout;
         var Scout = (function () {
             function Scout() {
             }
@@ -35,21 +39,13 @@ var Role;
              * @param creep
             **/
             Scout.run = function (creep) {
-                var memory = creep.memory;
-                if (memory.target == null) {
-                    var target_1 = Scout.findTarget();
-                    if (target_1 == null) {
-                        return;
+                if (creep.memory.target) {
+                    if (!creep.pos.isEqualTo(creep.memory.target)) {
+                        creep.moveTo(new RoomPosition(creep.memory.target.x, creep.memory.target.y, creep.memory.target.roomName));
                     }
-                    memory.target = target_1.id;
-                }
-                var target = Game.getObjectById(memory.target);
-                console.log(target.id);
-                if (!creep.pos.isEqualTo(target)) {
-                    creep.moveTo(target.pos);
-                }
-                else {
-                    creep.memory[(target.name + "_scouted_creeps_memory")] = creep.room.find(FIND_CREEPS);
+                    else {
+                        creep.memory[(creep.memory.target.name + "_scouted_creeps_memory")] = creep.room.find(FIND_CREEPS);
+                    }
                 }
             };
             /**
