@@ -44,7 +44,7 @@ module Role.Scout {
                 if (!creep.pos.isEqualTo(creep.memory.target)) {
                     creep.moveTo(new RoomPosition(creep.memory.target.x, creep.memory.target.y, creep.memory.target.roomName));
                 } else {
-                    creep.memory[`${creep.memory.target.name}_scouted_creeps_memory`] = creep.room.find<CreepMemory>(FIND_CREEPS);
+                    //creep.memory[`${creep.memory.target.name}_scouted_creeps_memory`] = creep.room.find<CreepMemory>(FIND_CREEPS);
                 }
             }
         }

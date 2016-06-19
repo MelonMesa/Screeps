@@ -61,7 +61,12 @@ module Util {
         };
     }
 
-    export function QuickFindAny<T>(creep: Creep, type: number, memoryname: string, opts?: { filter: any | string; }): T {
+
+    interface ObjectTester {
+        (object: any): boolean;
+    }
+
+    export function QuickFindAny<T>(creep: Creep, type: number, memoryname: string, opts?: { filter: any | string; }, sustain?: ObjectTester): T {
         if (!creep.memory[memoryname]) {
             const obj = creep.room.find<T>(type, opts)[0];
             if (obj == null) return null;
@@ -70,9 +75,9 @@ module Util {
         }
         else {
             var obj = Game.getObjectById<T>(creep.memory[memoryname]);
-            if (obj == null) {
+            if (obj == null || (!sustain || sustain(obj))) {
                 creep.memory[memoryname] = null;
-                return QuickFindAny<T>(creep, type, memoryname, opts);
+                return QuickFindAny<T>(creep, type, memoryname, opts, sustain);
             }
 
             return obj;
