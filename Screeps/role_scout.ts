@@ -9,7 +9,10 @@ module Role.Scout {
     export const role: util.RoleDetails =
         {
             name: "Scout",
-            body: [MOVE, MOVE, MOVE]
+            bodies: [
+                [MOVE, MOVE, MOVE],
+                [MOVE, MOVE, MOVE, MOVE, MOVE]
+            ]
         };
 
     /**

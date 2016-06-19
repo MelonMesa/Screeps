@@ -9,7 +9,7 @@ module Role.SourceMiner {
     export const role: util.RoleDetails =
         {
             name: "miner",
-            body: [WORK, MOVE]
+            bodies: [ [WORK, MOVE] ]
         };
 
     /**

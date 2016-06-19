@@ -9,7 +9,7 @@ module Role.Builder {
     export const role: util.RoleDetails =
         {
             name: "builder",
-            body: [WORK, CARRY, MOVE]
+            bodies: [ [WORK, CARRY, MOVE] ]
         };
 
     /**

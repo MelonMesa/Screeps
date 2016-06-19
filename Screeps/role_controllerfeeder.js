@@ -16,7 +16,7 @@ var Role;
         **/
         ControllerFeeder_1.role = {
             name: "controllerfeeder",
-            body: [WORK, CARRY, MOVE]
+            bodies: [[WORK, CARRY, MOVE]]
         };
         /**
          * Spawns a controller-feeder creep.

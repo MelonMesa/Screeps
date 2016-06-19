@@ -16,7 +16,7 @@ var Role;
         **/
         Builder_1.role = {
             name: "builder",
-            body: [WORK, CARRY, MOVE]
+            bodies: [[WORK, CARRY, MOVE]]
         };
         /**
          * Spawns a builder creep.

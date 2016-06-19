@@ -16,7 +16,7 @@ var Role;
         **/
         SourceMiner_1.role = {
             name: "miner",
-            body: [WORK, MOVE]
+            bodies: [[WORK, MOVE]]
         };
         /**
          * Spawns a harvester creep.

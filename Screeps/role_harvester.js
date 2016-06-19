@@ -16,7 +16,7 @@ var Role;
         **/
         Harvester_1.role = {
             name: "harvester",
-            body: [WORK, CARRY, MOVE]
+            bodies: [[WORK, CARRY, MOVE]]
         };
         /**
          * Spawns a harvester creep.
