@@ -6,9 +6,9 @@ var SpawnController;
     var spawnRatios = [
         { roleName: "miner", ratio: 1 },
         { roleName: "transporter", ratio: 1 },
-        { roleName: "miner", ratio: 1 },
-        { roleName: "transporter", ratio: 1 },
-        { roleName: "controllerfeeder", ratio: 1 },
+        { roleName: "miner", ratio: 3 },
+        { roleName: "transporter", ratio: 3 },
+        { roleName: "controllerfeeder", ratio: 2 },
         { roleName: "builder", ratio: 1 },
     ];
     var ratioSum = spawnRatios.map(function (s) { return s.ratio; }).reduce(function (a, b) { return a + b; });
@@ -50,15 +50,14 @@ var SpawnController;
             totalCount++;
         }
         // normalise
-        if (totalCount > 0) {
-            for (var roleName in roleCall) {
-                roleCall[roleName] /= totalCount;
-            }
+        for (var roleName in roleCall) {
+            roleCall[roleName] /= ratioSum;
         }
         // find ratios less than target, in order
         for (var i = 0; i < spawnRatios.length; i++) {
             var spawnRatio = spawnRatios[i];
             if ((roleCall[spawnRatio.roleName] || 0) <= spawnRatio.ratio) {
+                console.log("SpawnController.findNextRoleToSpawn: " + spawnRatio.roleName + "(" + i + ") " + spawnRatio);
                 return spawnRatio.roleName;
             }
         }
