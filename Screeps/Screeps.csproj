@@ -28,6 +28,7 @@
     <Reference Include="System.Web" />
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="definitions\lodash.d.ts" />
     <TypeScriptCompile Include="main.ts" />
     <TypeScriptCompile Include="role_builder.ts" />
     <TypeScriptCompile Include="role_controllerfeeder.ts" />
