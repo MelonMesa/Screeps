@@ -65,7 +65,7 @@ var Role;
                 }
                 else {
                     var spawndropsite = util.QuickFindAny(creep, FIND_MY_SPAWNS, "transportspawn");
-                    if (spawndropsite.transferEnergy(creep) == ERR_NOT_IN_RANGE) {
+                    if (spawndropsite && spawndropsite.transferEnergy(creep) == ERR_NOT_IN_RANGE) {
                         creep.moveTo(spawndropsite);
                     }
                 }

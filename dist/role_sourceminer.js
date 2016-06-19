@@ -36,7 +36,7 @@ var Role;
             **/
             SourceMiner.run = function (creep) {
                 var source = util.QuickFindAny(creep, FIND_SOURCES, "minesource");
-                if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
+                if (source && creep.harvest(source) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(source);
                 }
             };

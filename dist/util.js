@@ -44,7 +44,7 @@ var Util;
         };
     }
     Util.creepTicker = creepTicker;
-    function QuickFindAny(creep, type, memoryname, opts) {
+    function QuickFindAny(creep, type, memoryname, opts, sustain) {
         if (!creep.memory[memoryname]) {
             var obj_1 = creep.room.find(type, opts)[0];
             if (obj_1 == null)
@@ -54,9 +54,9 @@ var Util;
         }
         else {
             var obj = Game.getObjectById(creep.memory[memoryname]);
-            if (obj == null) {
+            if (obj == null || (!sustain || sustain(obj))) {
                 creep.memory[memoryname] = null;
-                return QuickFindAny(creep, type, memoryname, opts);
+                return QuickFindAny(creep, type, memoryname, opts, sustain);
             }
             return obj;
         }

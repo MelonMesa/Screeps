@@ -37,13 +37,13 @@ var Role;
             Harvester.run = function (creep) {
                 if (creep.carry.energy < creep.carryCapacity) {
                     var source = util.QuickFindAny(creep, FIND_SOURCES, "minesource");
-                    if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
+                    if (source && creep.harvest(source) == ERR_NOT_IN_RANGE) {
                         creep.moveTo(source);
                     }
                 }
                 else {
                     var spawndropsite = util.QuickFindAny(creep, FIND_MY_SPAWNS, "transportspawn");
-                    if (creep.transfer(spawndropsite, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    if (spawndropsite && creep.transfer(spawndropsite, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                         creep.moveTo(Game.spawns["Spawn1"]);
                     }
                 }

@@ -29,7 +29,7 @@ module Role.SourceMiner {
         @util.creepTicker(role)
         protected static run(creep: Creep) {
             const source = util.QuickFindAny<Source>(creep, FIND_SOURCES, "minesource");
-            if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
+            if (source && creep.harvest(source) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(source);
             }
         }

@@ -36,7 +36,6 @@
     <TypeScriptCompile Include="role_scout.ts" />
     <TypeScriptCompile Include="role_transporter.ts" />
     <TypeScriptCompile Include="screeps.d.ts" />
-    <TypeScriptCompile Include="RoomController.ts" />
     <TypeScriptCompile Include="SpawnController.ts" />
     <TypeScriptCompile Include="util.ts" />
   </ItemGroup>

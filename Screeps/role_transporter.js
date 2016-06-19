@@ -38,6 +38,8 @@ var Role;
                 var energyresource = util.QuickFindAny(creep, FIND_DROPPED_RESOURCES, "transportsource", {
                     filter: { resourceType: RESOURCE_ENERGY }
                 });
+                if (creep.carry.energy <= 0 && !energyresource)
+                    return;
                 if (creep.carry.energy < creep.carryCapacity && energyresource) {
                     if (creep.pickup(energyresource) == ERR_NOT_IN_RANGE) {
                         creep.moveTo(energyresource);
@@ -45,7 +47,23 @@ var Role;
                 }
                 else {
                     var spawndropsite = util.QuickFindAny(creep, FIND_MY_SPAWNS, "transportspawn");
-                    if (creep.transfer(spawndropsite, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    if (!spawndropsite)
+                        return;
+                    if (spawndropsite.energy >= spawndropsite.energyCapacity) {
+                        // Need lodash.sum for structure.store
+                        // ((structure.structureType == STRUCTURE_STORAGE || structure.structuretype == STRUCTURE_CONTAINER) && structure.store < structure.storeCapacity)
+                        var dropsite = util.QuickFindAny(creep, FIND_MY_STRUCTURES, "transportdropsite", {
+                            filter: function (structure) {
+                                return ((structure.structureType == STRUCTURE_EXTENSION && structure.energy < structure.energyCapacity) ||
+                                    ((structure.structureType == STRUCTURE_STORAGE || structure.structuretype == STRUCTURE_CONTAINER) && structure.store.energy < structure.storeCapacity));
+                            }
+                        }, function (structure) { return (structure.structureType == STRUCTURE_EXTENSION && (structure.energy < structure.energyCapacity)) ||
+                            ((structure.structureType == STRUCTURE_STORAGE || structure.structuretype == STRUCTURE_CONTAINER) && structure.store.energy < structure.storeCapacity); });
+                        if (creep.transfer(dropsite, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                            creep.moveTo(dropsite);
+                        }
+                    }
+                    else if (creep.transfer(spawndropsite, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                         creep.moveTo(spawndropsite);
                     }
                 }

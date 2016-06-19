@@ -33,6 +33,8 @@ module Role.Transporter {
                 filter: { resourceType: RESOURCE_ENERGY }
             });
 
+            if (creep.carry.energy <= 0 && !energyresource) return;
+
             if (creep.carry.energy < creep.carryCapacity && energyresource) {
                 if (creep.pickup(energyresource) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(energyresource);
@@ -40,16 +42,20 @@ module Role.Transporter {
             }
             else {
                 const spawndropsite = util.QuickFindAny<Spawn>(creep, FIND_MY_SPAWNS, "transportspawn");
+                if (!spawndropsite) return;
+
                 if (spawndropsite.energy >= spawndropsite.energyCapacity) {
 
                     // Need lodash.sum for structure.store
                     // ((structure.structureType == STRUCTURE_STORAGE || structure.structuretype == STRUCTURE_CONTAINER) && structure.store < structure.storeCapacity)
                     const dropsite = util.QuickFindAny<Structure>(creep, FIND_MY_STRUCTURES, "transportdropsite", {
                         filter: (structure) => {
-                            return ((structure.structureType == STRUCTURE_EXTENSION && structure.energy < structure.energyCapacity));
+                            return ((structure.structureType == STRUCTURE_EXTENSION && structure.energy < structure.energyCapacity) ||
+                                ((structure.structureType == STRUCTURE_STORAGE || structure.structuretype == STRUCTURE_CONTAINER) && structure.store.energy < structure.storeCapacity));
                         }
-                    }, (structure) => structure.energy < structure.energyCapacity);
-
+                    }, (structure) => (structure.structureType == STRUCTURE_EXTENSION && (structure.energy < structure.energyCapacity)) ||
+                        ((structure.structureType == STRUCTURE_STORAGE || structure.structuretype == STRUCTURE_CONTAINER) && structure.store.energy < structure.storeCapacity)
+                    );
 
                     if (creep.transfer(dropsite, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                         creep.moveTo(dropsite);

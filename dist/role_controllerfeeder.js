@@ -42,8 +42,22 @@ var Role;
                     }
                 }
                 else {
-                    if (Game.spawns["Spawn1"].transferEnergy(creep) == ERR_NOT_IN_RANGE) {
-                        creep.moveTo(Game.spawns["Spawn1"]);
+                    var pickupsite = util.QuickFindAny(creep, FIND_MY_STRUCTURES, "feederspawn", {
+                        filter: function (structure) {
+                            return ((structure.structureType == STRUCTURE_EXTENSION && structure.energy > 0));
+                        }
+                    }, function (structure) { return structure.energy > 0; });
+                    if (pickupsite) {
+                        if (pickupsite.structureType == STRUCTURE_EXTENSION) {
+                            if (pickupsite.transferEnergy(creep) == ERR_NOT_IN_RANGE) {
+                                creep.moveTo(pickupsite);
+                            }
+                        }
+                        else if (pickupsite.structureType == STRUCTURE_CONTAINER || pickupsite.structureType == STRUCTURE_STORAGE) {
+                            if (pickupsite.transfer(creep, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                                creep.moveTo(pickupsite);
+                            }
+                        }
                     }
                 }
             };

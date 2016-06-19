@@ -1,11 +1,11 @@
 /// <reference path="screeps.d.ts" />
 "use strict";
 var util = require("./util");
+var spawnController = require("./SpawnController");
 var activeRoles = ["harvester", "controllerfeeder", "scout", "builder", "transporter", "sourceminer"];
 for (var i = 0; i < activeRoles.length; i++) {
     require("./role_" + activeRoles[i]);
 }
-var spawnController = require("./SpawnController");
 var Main;
 (function (Main) {
     /**

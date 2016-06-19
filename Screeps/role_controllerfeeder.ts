@@ -35,9 +35,24 @@ module Role.ControllerFeeder {
                 }
             }
             else {
-                
-                if (Game.spawns["Spawn1"].transferEnergy(creep) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(Game.spawns["Spawn1"]);
+                const pickupsite = util.QuickFindAny<any>(creep, FIND_MY_STRUCTURES, "feederspawn", {
+                    filter: (structure) => {
+                        return ((structure.structureType == STRUCTURE_EXTENSION && structure.energy > 0));
+                    }
+                }, (structure) => structure.energy > 0);
+
+                if (pickupsite)
+                {
+                    if (pickupsite.structureType == STRUCTURE_EXTENSION) {
+                        if (pickupsite.transferEnergy(creep) == ERR_NOT_IN_RANGE) {
+                            creep.moveTo(pickupsite);
+                        }
+                    }
+                    else if (pickupsite.structureType == STRUCTURE_CONTAINER || pickupsite.structureType == STRUCTURE_STORAGE) {
+                        if (pickupsite.transfer(creep, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                            creep.moveTo(pickupsite);
+                        }
+                    }
                 }
             }
         }
