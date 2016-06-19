@@ -57,7 +57,7 @@ var SpawnController;
         for (var i = 0; i < spawnRatios.length; i++) {
             var spawnRatio = spawnRatios[i];
             if ((roleCall[spawnRatio.roleName] || 0) <= spawnRatio.ratio) {
-                console.log("SpawnController.findNextRoleToSpawn: " + spawnRatio.roleName + "(" + i + ") " + spawnRatio);
+                console.log("SpawnController.findNextRoleToSpawn: " + spawnRatio.roleName + "(" + i + ") " + roleCall[spawnRatio.roleName]);
                 return spawnRatio.roleName;
             }
         }
