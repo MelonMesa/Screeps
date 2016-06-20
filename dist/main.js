@@ -1,38 +1,11 @@
 /// <reference path="screeps.d.ts" />
 "use strict";
-var util = require("./util");
-var spawnController = require("./SpawnController");
-var roomController = require("./RoomController");
-var activeRoles = ["harvester", "controllerfeeder", "scout", "builder", "transporter", "sourceminer"];
-for (var i = 0; i < activeRoles.length; i++) {
-    require("./role_" + activeRoles[i]);
-}
 var Main;
 (function (Main) {
     /**
      * Main game loop.
     **/
     function loop() {
-        // Spawn control
-        spawnController.doSpawnLogic();
-        roomController.doRoomLogic();
-        // Iterate all creeps
-        for (var name in Game.creeps) {
-            // Get creep
-            var creep = Game.creeps[name];
-            if (!creep.spawning) {
-                // Get memory and role
-                var mem = creep.memory;
-                var roleInfo = util.roles[mem.role];
-                // Tick
-                if (roleInfo) {
-                    roleInfo.ticker(creep);
-                }
-                else {
-                    console.log(creep.name + " Unknown role " + mem.role);
-                }
-            }
-        }
     }
     Main.loop = loop;
 })(Main || (Main = {}));
