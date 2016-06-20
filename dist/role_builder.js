@@ -64,8 +64,12 @@ var Role;
                     }
                 }
                 else {
-                    var spawndropsite = util.QuickFindAny(creep, FIND_MY_SPAWNS, "transportspawn");
-                    if (spawndropsite && spawndropsite.transferEnergy(creep) == ERR_NOT_IN_RANGE) {
+                    var spawndropsite = util.QuickFindAny(creep, FIND_MY_SPAWNS, "transportspawn", {
+                        filter: function (spawn) {
+                            return spawn.energy > 250;
+                        }
+                    });
+                    if (spawndropsite && spawndropsite.transferEnergy(creep, spawndropsite.energy - 250) == ERR_NOT_IN_RANGE) {
                         creep.moveTo(spawndropsite);
                     }
                 }

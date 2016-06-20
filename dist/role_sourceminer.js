@@ -35,9 +35,33 @@ var Role;
              * @param creep
             **/
             SourceMiner.run = function (creep) {
-                var source = util.QuickFindAny(creep, FIND_SOURCES, "minesource");
-                if (source && creep.harvest(source) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(source);
+                var roommemory = creep.room.memory;
+                var minermemory = creep.memory;
+                if (roommemory.noSources || !roommemory.sources)
+                    return;
+                if (minermemory.source) {
+                    if (creep.ticksToLive <= 1) {
+                        for (var i = 0; i < roommemory.sources.length; i++) {
+                            var source = roommemory.sources[i];
+                            source.currentWorkers--;
+                        }
+                    }
+                    else {
+                        var source_1 = Game.getObjectById(minermemory.source);
+                        if (source_1 && creep.harvest(source_1) == ERR_NOT_IN_RANGE) {
+                            creep.moveTo(source_1);
+                        }
+                    }
+                    return;
+                }
+                else {
+                    for (var i = 0; i < roommemory.sources.length; i++) {
+                        var source_2 = roommemory.sources[i];
+                        if (source_2.currentWorkers < source_2.workersMax) {
+                            source_2.currentWorkers++;
+                            minermemory.source = source_2.name;
+                        }
+                    }
                 }
             };
             __decorate([

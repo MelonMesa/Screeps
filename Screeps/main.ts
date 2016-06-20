@@ -2,6 +2,7 @@
 
 import util = require("./util");
 import spawnController = require("./SpawnController");
+import roomController = require("./RoomController");
 
 const activeRoles = ["harvester", "controllerfeeder", "scout", "builder", "transporter", "sourceminer"];
 for (var i = 0; i < activeRoles.length; i++) {
@@ -16,6 +17,7 @@ module Main {
     export function loop() {
         // Spawn control
         spawnController.doSpawnLogic();
+        roomController.doRoomLogic();
 
         // Iterate all creeps
         for (var name in Game.creeps) {

@@ -62,8 +62,12 @@ module Role.Builder {
             }
             else {
 
-                const spawndropsite = util.QuickFindAny<Spawn>(creep, FIND_MY_SPAWNS, "transportspawn");
-                if (spawndropsite && spawndropsite.transferEnergy(creep) == ERR_NOT_IN_RANGE) {
+                const spawndropsite = util.QuickFindAny<Spawn>(creep, FIND_MY_SPAWNS, "transportspawn", {
+                    filter: (spawn) => {
+                        return spawn.energy > 250;
+                    }
+                });
+                if (spawndropsite && spawndropsite.transferEnergy(creep, spawndropsite.energy - 250) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(spawndropsite);
                 }
             }
