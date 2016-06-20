@@ -9,7 +9,7 @@ module Role.Harvester {
     export const role: util.RoleDetails =
         {
             name: "harvester",
-            body: [WORK, CARRY, MOVE]
+            bodies: [ [WORK, CARRY, MOVE] ]
         };
 
     /**

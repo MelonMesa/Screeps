@@ -16,7 +16,10 @@ var Role;
         **/
         Scout_1.role = {
             name: "Scout",
-            body: [MOVE, MOVE, MOVE]
+            bodies: [
+                [MOVE, MOVE, MOVE],
+                [MOVE, MOVE, MOVE, MOVE, MOVE]
+            ]
         };
         /**
          * Spawns a harvester creep.

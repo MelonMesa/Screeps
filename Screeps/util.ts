@@ -9,11 +9,12 @@ module Util {
         name: string;
 
         /** Body part composure of this role. */
-        body: string[];
+        bodies: string[][];
 
         /** Default starting memory for the creep. */
         memory?: CreepMemory;
     }
+
 
     /** Generic creep memory */
     export interface CreepMemory {
@@ -49,7 +50,7 @@ module Util {
                 mem[key] = memory[key];
             }
         }
-        return spawn.createCreep(role.body, creepName, mem);
+        return spawn.createCreep(role.bodies[0], creepName, mem);
     }
 
     export function creepTicker(role: RoleDetails): MethodDecorator {
@@ -59,11 +60,6 @@ module Util {
                 ticker: target[propertyKey]
             };
         };
-    }
-
-    function isFunction(functionToCheck) {
-        var getType = {};
-        return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
     }
 
     export function QuickFindAny<T>(creep: Creep, type: number, memoryname: string, opts?: { filter: any | string; }): T {

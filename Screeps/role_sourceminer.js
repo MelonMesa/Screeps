@@ -16,7 +16,7 @@ var Role;
         **/
         SourceMiner_1.role = {
             name: "miner",
-            body: [WORK, MOVE]
+            bodies: [[WORK, MOVE]]
         };
         /**
          * Spawns a harvester creep.
@@ -35,9 +35,29 @@ var Role;
              * @param creep
             **/
             SourceMiner.run = function (creep) {
-                var source = util.QuickFindAny(creep, FIND_SOURCES, "minesource");
-                if (source && creep.harvest(source) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(source);
+                var roommemory = creep.room.memory;
+                var minermemory = creep.memory;
+                if (roommemory.noSources || !roommemory.sources)
+                    return;
+                if (minermemory.source) {
+                    var source = Game.getObjectById(minermemory.source);
+                    if (source && creep.harvest(source) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(source);
+                    }
+                    return;
+                }
+                else {
+                    for (var i = 0; i < roommemory.sources.length; i++) {
+                        var source = roommemory.sources[i];
+                        for (var j = 0; j < source.workersMax; j++) {
+                            var worker = source.currentWorkers[j];
+                            if (!worker || !Game.getObjectById(worker)) {
+                                source.currentWorkers[j] = creep.id;
+                                minermemory.source = source.name;
+                                return;
+                            }
+                        }
+                    }
                 }
             };
             __decorate([

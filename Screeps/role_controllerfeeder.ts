@@ -9,7 +9,7 @@ module Role.ControllerFeeder {
     export const role: util.RoleDetails =
         {
             name: "controllerfeeder",
-            body: [WORK, CARRY, MOVE]
+            bodies: [ [WORK, CARRY, MOVE] ]
         };
 
     /**

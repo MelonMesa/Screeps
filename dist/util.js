@@ -32,7 +32,7 @@ var Util;
                 mem[key] = memory[key];
             }
         }
-        return spawn.createCreep(role.body, creepName, mem);
+        return spawn.createCreep(role.bodies[0], creepName, mem);
     }
     Util.spawnCreep = spawnCreep;
     function creepTicker(role) {
@@ -44,10 +44,6 @@ var Util;
         };
     }
     Util.creepTicker = creepTicker;
-    function isFunction(functionToCheck) {
-        var getType = {};
-        return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
-    }
     function QuickFindAny(creep, type, memoryname, opts) {
         if (!creep.memory[memoryname]) {
             var obj_1 = creep.room.find(type, opts)[0];

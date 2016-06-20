@@ -29,7 +29,7 @@ var SpawnController;
                         return;
                     }
                     var roleDetails = util.roles[memory.buildQueue].role;
-                    if (spawn.canCreateCreep(roleDetails.body) === OK) {
+                    if (spawn.canCreateCreep(roleDetails.bodies[0]) === OK) {
                         util.spawnCreep(roleDetails, spawnName);
                         console.log("Spawning a " + roleDetails.name + " at " + spawnName);
                         memory.buildQueue = null;

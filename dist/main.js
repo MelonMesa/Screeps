@@ -2,6 +2,7 @@
 "use strict";
 var util = require("./util");
 var spawnController = require("./SpawnController");
+var roomController = require("./RoomController");
 var activeRoles = ["harvester", "controllerfeeder", "scout", "builder", "transporter", "sourceminer"];
 for (var i = 0; i < activeRoles.length; i++) {
     require("./role_" + activeRoles[i]);
@@ -14,6 +15,7 @@ var Main;
     function loop() {
         // Spawn control
         spawnController.doSpawnLogic();
+        roomController.doRoomLogic();
         // Iterate all creeps
         for (var name in Game.creeps) {
             // Get creep
@@ -27,7 +29,7 @@ var Main;
                     roleInfo.ticker(creep);
                 }
                 else {
-                    console.log("Unknown role " + mem.role);
+                    console.log(creep.name + " Unknown role " + mem.role);
                 }
             }
         }

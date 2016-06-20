@@ -9,7 +9,7 @@ module Role.Transporter {
     export const role: util.RoleDetails =
         {
             name: "transporter",
-            body: [CARRY, MOVE, MOVE]
+            bodies: [ [CARRY, CARRY, MOVE] ]
         };
 
     /**

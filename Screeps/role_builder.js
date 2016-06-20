@@ -16,7 +16,7 @@ var Role;
         **/
         Builder_1.role = {
             name: "builder",
-            body: [WORK, CARRY, MOVE]
+            bodies: [[WORK, CARRY, MOVE]]
         };
         /**
          * Spawns a builder creep.
@@ -64,8 +64,12 @@ var Role;
                     }
                 }
                 else {
-                    var spawndropsite = util.QuickFindAny(creep, FIND_MY_SPAWNS, "transportspawn");
-                    if (spawndropsite && spawndropsite.transferEnergy(creep) == ERR_NOT_IN_RANGE) {
+                    var spawndropsite = util.QuickFindAny(creep, FIND_MY_SPAWNS, "transportspawn", {
+                        filter: function (spawn) {
+                            return spawn.energy > 250;
+                        }
+                    });
+                    if (spawndropsite && spawndropsite.transferEnergy(creep, spawndropsite.energy - 250) == ERR_NOT_IN_RANGE) {
                         creep.moveTo(spawndropsite);
                     }
                 }
