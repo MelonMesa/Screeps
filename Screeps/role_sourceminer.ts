@@ -51,10 +51,10 @@ module Role.SourceMiner {
                     const source = roommemory.sources[i];
 
                     for (var j = 0; j < source.workersMax; j++) {
-                        const worker = source.currentWorkers[i];
+                        const worker = source.currentWorkers[j];
 
                         if (!worker || !Game.getObjectById(worker)) {
-                            source.currentWorkers[i] = creep.id;
+                            source.currentWorkers[j] = creep.id;
                             minermemory.source = source.name;
 
                             return;
