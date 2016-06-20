@@ -29,7 +29,7 @@ var Main;
                     roleInfo.ticker(creep);
                 }
                 else {
-                    console.log("Unknown role " + mem.role);
+                    console.log(creep.name + " Unknown role " + mem.role);
                 }
             }
         }

@@ -40,26 +40,22 @@ var Role;
                 if (roommemory.noSources || !roommemory.sources)
                     return;
                 if (minermemory.source) {
-                    if (creep.ticksToLive <= 1) {
-                        for (var i = 0; i < roommemory.sources.length; i++) {
-                            var source = roommemory.sources[i];
-                            source.currentWorkers--;
-                        }
-                    }
-                    else {
-                        var source_1 = Game.getObjectById(minermemory.source);
-                        if (source_1 && creep.harvest(source_1) == ERR_NOT_IN_RANGE) {
-                            creep.moveTo(source_1);
-                        }
+                    var source = Game.getObjectById(minermemory.source);
+                    if (source && creep.harvest(source) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(source);
                     }
                     return;
                 }
                 else {
                     for (var i = 0; i < roommemory.sources.length; i++) {
-                        var source_2 = roommemory.sources[i];
-                        if (source_2.currentWorkers < source_2.workersMax) {
-                            source_2.currentWorkers++;
-                            minermemory.source = source_2.name;
+                        var source = roommemory.sources[i];
+                        for (var j = 0; j < source.workersMax; j++) {
+                            var worker = source.currentWorkers[i];
+                            if (!worker || !Game.getObjectById(worker)) {
+                                source.currentWorkers[i] = creep.id;
+                                minermemory.source = source.name;
+                                return;
+                            }
                         }
                     }
                 }

@@ -1,6 +1,6 @@
 ﻿interface SourceMemory {
     name?: string;
-    currentWorkers: number;
+    currentWorkers: string[];
     workersMax?: number;
 }
 

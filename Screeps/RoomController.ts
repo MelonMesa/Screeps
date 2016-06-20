@@ -31,7 +31,7 @@ module RoomController {
                         workSpotCount++;
                 }
             }
-            memories.push( { name: source.id, workersMax: workSpotCount, currentWorkers: 0 });
+            memories.push( { name: source.id, workersMax: workSpotCount, currentWorkers: [] });
         }
         return memories;
     }
