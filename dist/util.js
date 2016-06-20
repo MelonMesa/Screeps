@@ -58,7 +58,7 @@ var Util;
         }
         else {
             var obj = Game.getObjectById(creep.memory[memoryname]);
-            if (obj == null || (!opts || (isFunction(opts.filter)) && opts.filter(obj))) {
+            if (obj == null || (!opts || (typeof opts.filter == "function" && !opts.filter(obj)))) {
                 creep.memory[memoryname] = null;
                 return QuickFindAny(creep, type, memoryname, opts);
             }
