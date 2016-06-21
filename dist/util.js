@@ -1,4 +1,3 @@
-/// <reference path="screeps.d.ts" />
 "use strict";
 var Util;
 (function (Util) {
@@ -6,6 +5,10 @@ var Util;
      *  All registered roles.
     **/
     Util.roles = {};
+    /**
+     *  All registered controllers.
+    **/
+    Util.controllers = [];
     /**
      * Logs the specified error.
      * @param error
@@ -44,6 +47,10 @@ var Util;
         };
     }
     Util.creepTicker = creepTicker;
+    function controllerTicker() {
+        return function (target, propertyKey, descriptor) { Util.controllers.push(target[propertyKey]); };
+    }
+    Util.controllerTicker = controllerTicker;
     function QuickFindAny(creep, type, memoryname, opts) {
         if (!creep.memory[memoryname]) {
             var obj_1 = creep.room.find(type, opts)[0];

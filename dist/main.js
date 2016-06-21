@@ -1,21 +1,30 @@
-/// <reference path="screeps.d.ts" />
 "use strict";
 var util = require("./util");
-var spawnController = require("./SpawnController");
-var roomController = require("./RoomController");
+var profiler = require('./screeps-profiler');
+require("./SpawnController");
+require("./RoomController");
 var activeRoles = ["harvester", "controllerfeeder", "scout", "builder", "transporter", "sourceminer"];
 for (var i = 0; i < activeRoles.length; i++) {
     require("./role_" + activeRoles[i]);
 }
+var debugmode = false;
+if (debugmode)
+    profiler.enable();
 var Main;
 (function (Main) {
     /**
      * Main game loop.
     **/
     function loop() {
-        // Spawn control
-        spawnController.doSpawnLogic();
-        roomController.doRoomLogic();
+        if (debugmode)
+            profiler.wrap(Logic);
+        else
+            Logic();
+    }
+    Main.loop = loop;
+    function Logic() {
+        for (var i = 0; i < util.controllers.length; i++)
+            util.controllers[i]();
         // Iterate all creeps
         for (var name in Game.creeps) {
             // Get creep
@@ -34,7 +43,6 @@ var Main;
             }
         }
     }
-    Main.loop = loop;
 })(Main || (Main = {}));
 module.exports = Main;
 //# sourceMappingURL=main.js.map

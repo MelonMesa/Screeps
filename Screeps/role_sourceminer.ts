@@ -1,6 +1,4 @@
-﻿/// <reference path="screeps.d.ts" />
-
-import util = require("./util");
+﻿import util = require("./util");
 
 module Role.SourceMiner {
 
@@ -24,6 +22,7 @@ module Role.SourceMiner {
 
     interface MinerMemory {
         source?: string;
+        findSleepTime: number;
     }
 
     class SourceMiner {
@@ -47,6 +46,13 @@ module Role.SourceMiner {
                 return;
             }
             else {
+
+                // if we didn't find a source to mine sleep for 100 ticks
+                if (minermemory.findSleepTime > 0) {
+                    minermemory.findSleepTime--;
+                    return;
+                }
+
                 for (var i = 0; i < roommemory.sources.length; i++) {
                     const source = roommemory.sources[i];
 
@@ -61,6 +67,8 @@ module Role.SourceMiner {
                         }
                     }
                 }
+
+                minermemory.findSleepTime = 100;
             }
         }
 

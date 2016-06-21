@@ -1,6 +1,4 @@
-﻿/// <reference path="screeps.d.ts" />
-
-import util = require("./util");
+﻿import util = require("./util");
 
 module SpawnController {
 
@@ -13,9 +11,9 @@ module SpawnController {
         [
             { roleName: "miner", ratio: 1 },
             { roleName: "transporter", ratio: 1 },
-            { roleName: "miner", ratio: 3 },
-            { roleName: "transporter", ratio: 3 },
-            { roleName: "controllerfeeder", ratio: 2 },
+            { roleName: "miner", ratio: 4 },
+            { roleName: "transporter", ratio: 4 },
+            { roleName: "controllerfeeder", ratio: 4 },
             { roleName: "builder", ratio: 1 },
         ];
 
@@ -26,26 +24,30 @@ module SpawnController {
         buildQueue: string;
     }
 
-    export function doSpawnLogic(): void {
-        const memory = <SpawnControllerMemory>Memory;
-        const spawns = Game.spawns;
-        for (var spawnName in spawns) {
-            const spawn = spawns[spawnName];
-            if (!spawn.spawning) {
-                //console.log(`I want to find work for ${spawnName}`);
-                if (!memory.buildQueue) {
-                    memory.buildQueue = findNextRoleToSpawn();
-                }
-                if (memory.buildQueue) {
-                    if (!util.roles[memory.buildQueue]) {
-                        util.logError(`SpawnController.doSpawnLogic: Invalid role '${memory.buildQueue}'!`);
-                        return;
+    class SpawnController {
+
+        @util.controllerTicker()
+        private static run() {
+            const memory = <SpawnControllerMemory>Memory;
+            const spawns = Game.spawns;
+            for (var spawnName in spawns) {
+                const spawn = spawns[spawnName];
+                if (!spawn.spawning) {
+                    //console.log(`I want to find work for ${spawnName}`);
+                    if (!memory.buildQueue) {
+                        memory.buildQueue = findNextRoleToSpawn();
                     }
-                    const roleDetails = util.roles[memory.buildQueue].role;
-                    if (spawn.canCreateCreep(roleDetails.bodies[0]) === OK) {
-                        util.spawnCreep(roleDetails, spawnName);
-                        console.log(`Spawning a ${roleDetails.name} at ${spawnName}`);
-                        memory.buildQueue = null;
+                    if (memory.buildQueue) {
+                        if (!util.roles[memory.buildQueue]) {
+                            util.logError(`SpawnController.doSpawnLogic: Invalid role '${memory.buildQueue}'!`);
+                            return;
+                        }
+                        const roleDetails = util.roles[memory.buildQueue].role;
+                        if (spawn.canCreateCreep(roleDetails.bodies[0]) === OK) {
+                            util.spawnCreep(roleDetails, spawnName);
+                            console.log(`Spawning a ${roleDetails.name} at ${spawnName}`);
+                            memory.buildQueue = null;
+                        }
                     }
                 }
             }

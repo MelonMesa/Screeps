@@ -1,19 +1,22 @@
-﻿/// <reference path="screeps.d.ts" />
-
-import util = require("./util");
+﻿import util = require("./util");
 
 module RoomController {
 
-    export function doRoomLogic(): void {
-        for (const roomname in Game.rooms) {
-            const room = Game.rooms[roomname];
+    class RoomController {
 
-            const memory: RoomMemory = room.memory;
-            if (memory.sources == null || memory.noSources) {
-                memory.sources = findSources(room);
-                memory.noSources = memory.sources == null;
+        @util.controllerTicker()
+        private static run() {
+            for(const roomname in Game.rooms) {
+                const room = Game.rooms[roomname];
+
+                const memory: RoomMemory = room.memory;
+                if (memory.sources == null || memory.noSources) {
+                    memory.sources = findSources(room);
+                    memory.noSources = memory.sources == null;
+                }
             }
         }
+
     }
 
     function findSources(room: Room): SourceMemory[] {
@@ -27,7 +30,7 @@ module RoomController {
             for (var x = -1; x <= 1; x++) {
                 for (var y = -1; y <= 1; y++) {
                     const newpos = new RoomPosition(source.pos.x + x, source.pos.y + y, source.room.name);
-                    if (newpos.lookFor("terrain") == "plain")
+                    if (newpos.lookFor("terrain") != "wall")
                         workSpotCount++;
                 }
             }
