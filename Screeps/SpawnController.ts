@@ -1,89 +1,75 @@
 ﻿import util = require("./util");
+import BaseSector = require("./sectors/BaseSector.ts");
 
-module SpawnController {
-
-    interface SpawnRatio {
-        roleName: string;
-        ratio: number;
-    }
-
-    const spawnRatios: SpawnRatio[] =
-        [
-            { roleName: "miner", ratio: 1 },
-            { roleName: "transporter", ratio: 1 },
-            { roleName: "miner", ratio: 4 },
-            { roleName: "transporter", ratio: 4 },
-            { roleName: "controllerfeeder", ratio: 4 },
-            { roleName: "builder", ratio: 1 },
-        ];
-
-    const ratioSum = spawnRatios.map(s => s.ratio).reduce((a, b) => a + b);
-    spawnRatios.forEach(s => s.ratio /= ratioSum);
-
-    interface SpawnControllerMemory extends Memory {
-        buildQueue: string;
-    }
-
-    class SpawnController {
-
-        @util.controllerTicker()
-        private static run() {
-            const memory = <SpawnControllerMemory>Memory;
-            const spawns = Game.spawns;
-            for (var spawnName in spawns) {
-                const spawn = spawns[spawnName];
-                if (!spawn.spawning) {
-                    //console.log(`I want to find work for ${spawnName}`);
-                    if (!memory.buildQueue) {
-                        memory.buildQueue = findNextRoleToSpawn();
-                    }
-                    if (memory.buildQueue) {
-                        if (!util.roles[memory.buildQueue]) {
-                            util.logError(`SpawnController.doSpawnLogic: Invalid role '${memory.buildQueue}'!`);
-                            return;
-                        }
-                        const roleDetails = util.roles[memory.buildQueue].role;
-                        if (spawn.canCreateCreep(roleDetails.bodies[0]) === OK) {
-                            util.spawnCreep(roleDetails, spawnName);
-                            console.log(`Spawning a ${roleDetails.name} at ${spawnName}`);
-                            memory.buildQueue = null;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    function findNextRoleToSpawn(): string {
-        // tally up how many of each role we have
-        const roleCall: { [name: string]: number } = {};
-        var totalCount = 0;
-        for (var creepName in Game.creeps) {
-            const creep = Game.creeps[creepName];
-            const memory: util.CreepMemory = creep.memory;
-            roleCall[memory.role] = (roleCall[memory.role] || 0) + 1;
-            totalCount++;
-        }
-
-        // normalise
-        for (var roleName in roleCall) {
-            roleCall[roleName] /= ratioSum;
-            //console.log(`${roleName} = ${roleCall[roleName]}`);
-        }
-
-        // find ratios less than target, in order
-        for (var i = 0; i < spawnRatios.length; i++) {
-            const spawnRatio = spawnRatios[i];
-            if ((roleCall[spawnRatio.roleName] || 0) <= spawnRatio.ratio) {
-                console.log(`SpawnController.findNextRoleToSpawn: ${spawnRatio.roleName}(${i}) ${roleCall[spawnRatio.roleName]}`);
-                return spawnRatio.roleName;
-            }
-        }
-
-        // uhhh
-        //console.log(roleCall);
-        return null;
-    }
-
+interface SpawnRatio {
+    roleName: string;
+    ratio: number;
 }
-export = SpawnController;
+
+const spawnRatios: SpawnRatio[] =
+    [
+        { roleName: "miner", ratio: 1 },
+        { roleName: "transporter", ratio: 1 },
+        { roleName: "miner", ratio: 4 },
+        { roleName: "transporter", ratio: 4 },
+        { roleName: "controllerfeeder", ratio: 4 },
+        { roleName: "builder", ratio: 1 },
+    ];
+
+const ratioSum = spawnRatios.map(s => s.ratio).reduce((a, b) => a + b);
+spawnRatios.forEach(s => s.ratio /= ratioSum);
+
+interface SpawnControllerMemory {
+    buildQueue: { roleName: string, level: number, sectorName: string, roomName: string, requestID: number }[];
+    nextRequestID: number;
+}
+
+class SpawnController {
+
+    private getMemory(): SpawnControllerMemory {
+        return Memory["spawnController"] || (Memory["spawnController"] = {
+            buildQueue: [],
+            nextRequestID: 1
+        });
+    }
+
+    /**
+     * Requests the specified creep to be spawned.
+     * The creep details will be added to the spawn queue.
+     * The creep will get spawned when the following requirements are satisfied:
+     * - there is a spawner available in the room specified that can spawn the specified role
+     * - the sector has enough allocated resources to afford the spawn
+     * Returns a unique ID for the request that can be used to cancel it.
+     * @param sector
+     * @param room
+     * @param role
+     * @param level
+     */
+    public requestSpawnCreep(sector: BaseSector, room: Room, role: util.RoleDetails, level: number = 0): number {
+        const mem = this.getMemory();
+        mem.buildQueue.push({
+            sectorName: sector.name,
+            roomName: room.name,
+            roleName: role.name,
+            level: level,
+            requestID: mem.nextRequestID
+        });
+        return mem.nextRequestID++;
+    }
+
+    @util.controllerTicker()
+    private run() {
+        const memory = this.getMemory();
+
+        // Iterate each spawn request
+        for (var i = 0; i < memory.buildQueue.length; i++) {
+            const request = memory.buildQueue[i];
+            
+        }
+    }
+
+    private findNextRoleToS
+}
+
+const instance = new SpawnController();
+export = instance;

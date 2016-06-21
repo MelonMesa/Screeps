@@ -51,7 +51,7 @@
     export function spawnCreep(role: RoleDetails, spawnName: string, creepName?: string, memory?: CreepMemory): string|number {
         const spawn = Game.spawns[spawnName];
         if (spawn == null) { logError("spawnCreep: Invalid spawn name"); return null; }
-        const mem: CreepMemory = { role: role.name };
+        const mem: CreepMemory = { role: role.name, sector: null };
         if (memory) {
             for (var key in memory) {
                 mem[key] = memory[key];

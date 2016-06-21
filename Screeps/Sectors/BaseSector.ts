@@ -50,14 +50,24 @@ abstract class BaseSector {
         const roomID = (typeof room === "string") ? room : room.name;
         var mem: SectorMemory;
         if (mem = this._memory[roomID]) { return mem; }
-        return this._memory[roomID] = {
+        this.onCreated(typeof room === "string" ? Game.rooms[room] : room, mem = this._memory[roomID] = {
             resources: {
                 energy: 0
             },
             requestedResources: {
                 energy: 0
             }
-        };
+        });
+        return mem;
+    }
+
+    /**
+     * Called when sector memory has just been initialised for a room.
+     * @param room
+     * @param mem
+     */
+    protected onCreated(room: Room, mem: SectorMemory): void {
+
     }
 
     /**
@@ -94,6 +104,12 @@ abstract class BaseSector {
         }
         return arr;
     }
+
+    /**
+     * Runs a logic update tick for the given room.
+     * @param room
+     */
+    public abstract tick(room: Room): void;
 
 }
 

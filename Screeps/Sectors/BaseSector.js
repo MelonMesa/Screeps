@@ -60,6 +60,21 @@ var BaseSector = (function () {
      * @param amount    The amount of energy to release
      */
     BaseSector.prototype.releaseEnergy = function (room, amount) {
+        this.getMemory(room).resources.energy -= amount;
+    };
+    /**
+     * Gets all creeps belonging to this sector within the specified room.
+     * @param room
+     */
+    BaseSector.prototype.getCreeps = function (room) {
+        var arr = [];
+        for (var key in Game.creeps) {
+            var creep = Game.creeps[key];
+            if (creep.memory.sector === this._name && (creep.room === room || creep.room.name === room)) {
+                arr.push(creep);
+            }
+        }
+        return arr;
     };
     return BaseSector;
 }());
