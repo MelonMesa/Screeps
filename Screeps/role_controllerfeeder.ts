@@ -1,6 +1,4 @@
-﻿/// <reference path="screeps.d.ts" />
-
-import util = require("./util");
+﻿import util = require("./util");
 
 module Role.ControllerFeeder {
     /**

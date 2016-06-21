@@ -1,8 +1,7 @@
-﻿/// <reference path="screeps.d.ts" />
-
-module Util {
+﻿module Util {
 
     export type CreepTicker = (creep: Creep) => void;
+    export type Ticker = () => void;
 
     export interface RoleDetails {
         /** Name of the role. */
@@ -29,6 +28,11 @@ module Util {
      *  All registered roles.
     **/
     export const roles: { [name: string]: { role: RoleDetails, ticker: CreepTicker } } = {};
+
+    /**
+     *  All registered controllers.
+    **/
+    export const controllers: Ticker[] = []
 
     /**
      * Logs the specified error.
@@ -63,6 +67,11 @@ module Util {
                 ticker: target[propertyKey]
             };
         };
+    }
+
+    export function controllerTicker(): MethodDecorator {
+        return function (target: Object, propertyKey: string, descriptor: PropertyDescriptor)
+        { controllers.push(target[propertyKey]); };
     }
 
     export function QuickFindAny<T>(creep: Creep, type: number, memoryname: string, opts?: { filter: any | string; }): T {

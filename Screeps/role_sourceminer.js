@@ -1,4 +1,3 @@
-/// <reference path="screeps.d.ts" />
 "use strict";
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -47,6 +46,11 @@ var Role;
                     return;
                 }
                 else {
+                    // if we didn't find a source to mine sleep for 100 ticks
+                    if (minermemory.findSleepTime > 0) {
+                        minermemory.findSleepTime--;
+                        return;
+                    }
                     for (var i = 0; i < roommemory.sources.length; i++) {
                         var source = roommemory.sources[i];
                         for (var j = 0; j < source.workersMax; j++) {
@@ -58,6 +62,7 @@ var Role;
                             }
                         }
                     }
+                    minermemory.findSleepTime = 100;
                 }
             };
             __decorate([
