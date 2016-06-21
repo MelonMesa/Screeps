@@ -1,5 +1,7 @@
 ﻿/// <reference path="../screeps.d.ts" />
 
+import util = require("../util");
+
 interface SectorMemory {
     /** Amount of resources allocated to this sector. */
     resources: {
@@ -44,7 +46,7 @@ abstract class BaseSector {
      * If it doesn't exist, it will be created.
      * @param room      Room reference or name.
      */
-    protected getMemory(room: string | Room): SectorMemory {
+    public getMemory(room: string | Room): SectorMemory {
         const roomID = (typeof room === "string") ? room : room.name;
         var mem: SectorMemory;
         if (mem = this._memory[roomID]) { return mem; }
@@ -75,7 +77,22 @@ abstract class BaseSector {
      * @param amount    The amount of energy to release
      */
     protected releaseEnergy(room: string | Room, amount: number): void {
+        this.getMemory(room).resources.energy -= amount;
+    }
 
+    /**
+     * Gets all creeps belonging to this sector within the specified room.
+     * @param room
+     */
+    protected getCreeps(room: string | Room): Creep[] {
+        const arr: Creep[] = [];
+        for (var key in Game.creeps) {
+            const creep = Game.creeps[key];
+            if ((<util.CreepMemory>creep.memory).sector === this._name && (creep.room === room || creep.room.name === room)) {
+                arr.push(creep);
+            }
+        }
+        return arr;
     }
 
 }

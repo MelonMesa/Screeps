@@ -20,6 +20,9 @@ module Util {
     export interface CreepMemory {
         /** Role name. */
         role: string;
+
+        /** Sector name. */
+        sector: string;
     }
 
     /**
