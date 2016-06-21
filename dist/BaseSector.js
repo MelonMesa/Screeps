@@ -1,55 +1,39 @@
-﻿/// <reference path="../screeps.d.ts" />
-
-import util = require("../util");
-
-interface SectorMemory {
-    /** Amount of resources allocated to this sector. */
-    resources: {
-        energy: number;
-    },
-
-    /** Amount of resources requested by the sector. */
-    requestedResources: {
-        energy: number;
-    }
-}
-
+"use strict";
 /**
  * Base class for any logical sectors. One global instance per sector type.
  * A sector is responsible for a unit of logic within an empire.
  * All creeps must be associated with a sector.
 **/
-abstract class BaseSector {
-
-    protected _name: string;
-    protected _memory: { [roomID: string]: SectorMemory };
-
-    /** Gets the name of this sector. */
-    public get name() {
-        return this._name;
-    }
-
+var BaseSector = (function () {
     /**
      * Initialises a new instance of the BaseSector class.
      * @param name      Name of the sector.
      */
-    constructor(name: string) {
+    function BaseSector(name) {
         this._name = name;
-
         // Get memory
-        const sectors = Memory["sectors"] || (Memory["sectors"] = {});
+        var sectors = Memory["sectors"] || (Memory["sectors"] = {});
         this._memory = sectors[name] || (sectors[name] = {});
     }
-
+    Object.defineProperty(BaseSector.prototype, "name", {
+        /** Gets the name of this sector. */
+        get: function () {
+            return this._name;
+        },
+        enumerable: true,
+        configurable: true
+    });
     /**
      * Gets sector memory for a specified room.
      * If it doesn't exist, it will be created.
      * @param room      Room reference or name.
      */
-    public getMemory(room: string | Room): SectorMemory {
-        const roomID = (typeof room === "string") ? room : room.name;
-        var mem: SectorMemory;
-        if (mem = this._memory[roomID]) { return mem; }
+    BaseSector.prototype.getMemory = function (room) {
+        var roomID = (typeof room === "string") ? room : room.name;
+        var mem;
+        if (mem = this._memory[roomID]) {
+            return mem;
+        }
         this.onCreated(typeof room === "string" ? Game.rooms[room] : room, mem = this._memory[roomID] = {
             resources: {
                 energy: 0
@@ -59,58 +43,47 @@ abstract class BaseSector {
             }
         });
         return mem;
-    }
-
+    };
     /**
      * Called when sector memory has just been initialised for a room.
      * @param room
      * @param mem
      */
-    protected onCreated(room: Room, mem: SectorMemory): void {
-
-    }
-
+    BaseSector.prototype.onCreated = function (room, mem) {
+    };
     /**
      * Places a request for an amount of energy to be allocated to this sector from the room stockpile.
      * The request will be fulfilled at some point in the future, based on the priority of this sector and the available energy.
      * @param room      The room to request energy from
      * @param amount    The amount of energy to take
      */
-    protected requestEnergy(room: string | Room, amount: number): void {
+    BaseSector.prototype.requestEnergy = function (room, amount) {
         this.getMemory(room).requestedResources.energy += amount;
-    }
-
+    };
     /**
      * Releases an amount of energy from the sector to the room stockpile.
      * Can't release more energy than this sector has.
      * @param room      The room to release energy to
      * @param amount    The amount of energy to release
      */
-    protected releaseEnergy(room: string | Room, amount: number): void {
+    BaseSector.prototype.releaseEnergy = function (room, amount) {
         this.getMemory(room).resources.energy -= amount;
-    }
-
+    };
     /**
      * Gets all creeps belonging to this sector within the specified room.
      * @param room
      */
-    protected getCreeps(room: string | Room): Creep[] {
-        const arr: Creep[] = [];
+    BaseSector.prototype.getCreeps = function (room) {
+        var arr = [];
         for (var key in Game.creeps) {
-            const creep = Game.creeps[key];
-            if ((<util.CreepMemory>creep.memory).sector === this._name && (creep.room === room || creep.room.name === room)) {
+            var creep = Game.creeps[key];
+            if (creep.memory.sector === this._name && (creep.room === room || creep.room.name === room)) {
                 arr.push(creep);
             }
         }
         return arr;
-    }
-
-    /**
-     * Runs a logic update tick for the given room.
-     * @param room
-     */
-    public abstract tick(room: Room): void;
-
-}
-
-export = BaseSector;
+    };
+    return BaseSector;
+}());
+module.exports = BaseSector;
+//# sourceMappingURL=BaseSector.js.map

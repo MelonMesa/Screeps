@@ -38,8 +38,9 @@
     <TypeScriptCompile Include="IRoom.ts" />
     <TypeScriptCompile Include="screeps.d.ts" />
     <TypeScriptCompile Include="RoomController.ts" />
-    <TypeScriptCompile Include="Sectors\BaseSector.ts" />
-    <TypeScriptCompile Include="Sectors\SectorController.ts" />
+    <TypeScriptCompile Include="BaseSector.ts" />
+    <TypeScriptCompile Include="Sector_Economy.ts" />
+    <TypeScriptCompile Include="SectorController.ts" />
     <TypeScriptCompile Include="SpawnController.ts" />
     <TypeScriptCompile Include="util.ts" />
   </ItemGroup>

@@ -1,7 +1,5 @@
-﻿/// <reference path="../screeps.d.ts" />
-
-import util = require("../util");
-import BaseSector = require("./BaseSector.ts");
+﻿import util = require("./util");
+import BaseSector = require("./BaseSector");
 
 /**
  * Responsible for looking after the sector system.
@@ -96,15 +94,13 @@ class SectorController {
         if (toDistrub > 0) {
             requests.sort((a, b) => a.priority - b.priority);
             var energyLeft = toDistrub;
-            var divisor = 1;
             for (var i = 0; i < requests.length; i++) {
                 if (requests[i].priority <= 0) break;
                 const rollingSumPriority = requests.map(r => r.priority).reduce((a, b) => a + b);
                 const request = requests.shift();
                 const alloc = Math.floor(Math.min(energyLeft * (request.priority / rollingSumPriority), request.amount));
                 if (alloc <= 0) break;
-                divisor = requests[i].priority;
-                const mem = requests[i].sector.getMemory(room);
+                const mem = request.sector.getMemory(room);
                 console.log(`Allocated ${alloc} energy to ${request.sector.name}, fulfilling ${(alloc === request.amount) ? "the entire request" : `some of the requested ${request.amount}`}`);
                 mem.requestedResources.energy -= alloc;
                 mem.resources.energy += alloc;

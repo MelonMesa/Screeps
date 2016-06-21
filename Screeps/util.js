@@ -29,7 +29,7 @@ var Util;
             logError("spawnCreep: Invalid spawn name");
             return null;
         }
-        var mem = { role: role.name };
+        var mem = { role: role.name, sector: null };
         if (memory) {
             for (var key in memory) {
                 mem[key] = memory[key];
@@ -38,6 +38,18 @@ var Util;
         return spawn.createCreep(role.bodies[0], creepName, mem);
     }
     Util.spawnCreep = spawnCreep;
+    /**
+     * Gets the spawn cost of the specified role/level.
+     * @param role
+     * @param level
+     */
+    function getCreepSpawnCost(role, level) {
+        if (level === void 0) { level = 0; }
+        return role.bodies[level]
+            .map(function (p) { return BODYPART_COST[p]; })
+            .reduce(function (a, b) { return a + b; });
+    }
+    Util.getCreepSpawnCost = getCreepSpawnCost;
     function creepTicker(role) {
         return function (target, propertyKey, descriptor) {
             Util.roles[role.name] = {

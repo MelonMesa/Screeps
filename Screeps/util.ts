@@ -60,6 +60,18 @@
         return spawn.createCreep(role.bodies[0], creepName, mem);
     }
 
+    /**
+     * Gets the spawn cost of the specified role/level.
+     * @param role
+     * @param level
+     */
+    export function getCreepSpawnCost(role: RoleDetails, level: number = 0): number {
+        return role.bodies[level]
+            .map(p => BODYPART_COST[p])
+            .reduce((a, b) => a + b);
+    }
+
+
     export function creepTicker(role: RoleDetails): MethodDecorator {
         return function (target: Object, propertyKey: string, descriptor: PropertyDescriptor) {
             roles[role.name] = {

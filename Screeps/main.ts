@@ -2,8 +2,12 @@
 
 var profiler = require('./screeps-profiler');
 
-require("./SpawnController");
-require("./RoomController");
+import sectorController = require("./SectorController");
+import spawnController = require("./SpawnController");
+import roomController = require("./RoomController");
+
+import EconomySector = require("./Sector_Economy");
+sectorController.registerSector(EconomySector, 100);
 
 const activeRoles = ["harvester", "controllerfeeder", "scout", "builder", "transporter", "sourceminer"];
 for (var i = 0; i < activeRoles.length; i++) {
@@ -27,6 +31,9 @@ module Main {
     }
 
     function Logic() {
+        // the inconsistency is real
+        sectorController.tick();
+        spawnController.run();
         for (var i = 0; i < util.controllers.length; i++)
             util.controllers[i]();
 

@@ -1,5 +1,6 @@
 ﻿import util = require("./util");
-import BaseSector = require("./sectors/BaseSector.ts");
+import BaseSector = require("./BaseSector");
+import SectorController = require("./SectorController");
 
 interface SpawnRatio {
     roleName: string;
@@ -57,18 +58,44 @@ class SpawnController {
         return mem.nextRequestID++;
     }
 
-    @util.controllerTicker()
-    private run() {
+    public run() {
         const memory = this.getMemory();
 
         // Iterate each spawn request
         for (var i = 0; i < memory.buildQueue.length; i++) {
             const request = memory.buildQueue[i];
-            
+            const room = Game.rooms[request.roomName];
+            if (room) {
+                // Check if the sector can afford
+                const sector = SectorController.getSector(request.sectorName);
+                if (sector.getMemory(room).resources.energy < util.getCreepSpawnCost(util.roles[request.roleName].role, request.level)) continue;
+
+                // Find a spawn for it
+                const spawns = room.find<Spawn>(FIND_MY_SPAWNS);
+                for (var j = 0; j < spawns.length; j++) {
+                    const spawn = spawns[j];
+                    if (!spawn.spawning) {
+                        const body = util.roles[request.roleName].role.bodies[request.level];
+                        var err = spawn.canCreateCreep(body);
+                        if (err === OK) {
+                            const creepMem: util.CreepMemory = {
+                                role: request.roleName,
+                                sector: request.sectorName
+                            };
+                            err = spawn.createCreep(body, undefined, creepMem);
+                            if (err !== OK) {
+                                util.logError(`Got error code ${err} when spawning creep '${request.roleName}' for sector '${request.sectorName}', even though it passed canCreateCreep check`);
+                            }
+                            memory.buildQueue.splice(i, 1);
+                            i--;
+                        } else {
+                            util.logError(`Got error code ${err} when checking if it's OK to spawn creep '${request.roleName}' for sector '${request.sectorName}'`);
+                        }
+                    }
+                }
+            }
         }
     }
-
-    private findNextRoleToS
 }
 
 const instance = new SpawnController();

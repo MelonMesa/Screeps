@@ -1,8 +1,10 @@
 "use strict";
 var util = require("./util");
 var profiler = require('./screeps-profiler');
-require("./SpawnController");
-require("./RoomController");
+var sectorController = require("./SectorController");
+var spawnController = require("./SpawnController");
+var EconomySector = require("./Sector_Economy");
+sectorController.registerSector(EconomySector, 100);
 var activeRoles = ["harvester", "controllerfeeder", "scout", "builder", "transporter", "sourceminer"];
 for (var i = 0; i < activeRoles.length; i++) {
     require("./role_" + activeRoles[i]);
@@ -23,6 +25,9 @@ var Main;
     }
     Main.loop = loop;
     function Logic() {
+        // the inconsistency is real
+        sectorController.tick();
+        spawnController.run();
         for (var i = 0; i < util.controllers.length; i++)
             util.controllers[i]();
         // Iterate all creeps

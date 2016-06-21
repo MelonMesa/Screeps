@@ -1,4 +1,3 @@
-/// <reference path="../screeps.d.ts" />
 "use strict";
 /**
  * Base class for any logical sectors. One global instance per sector type.
@@ -35,14 +34,22 @@ var BaseSector = (function () {
         if (mem = this._memory[roomID]) {
             return mem;
         }
-        return this._memory[roomID] = {
+        this.onCreated(typeof room === "string" ? Game.rooms[room] : room, mem = this._memory[roomID] = {
             resources: {
                 energy: 0
             },
             requestedResources: {
                 energy: 0
             }
-        };
+        });
+        return mem;
+    };
+    /**
+     * Called when sector memory has just been initialised for a room.
+     * @param room
+     * @param mem
+     */
+    BaseSector.prototype.onCreated = function (room, mem) {
     };
     /**
      * Places a request for an amount of energy to be allocated to this sector from the room stockpile.

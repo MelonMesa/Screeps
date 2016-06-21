@@ -17,7 +17,7 @@ var RoomController;
                 var memory = room.memory;
                 if (memory.sources == null || memory.noSources) {
                     memory.sources = findSources(room);
-                    memory.noSources = memory.sources == null;
+                    memory.noSources = memory.sources == null || memory.sources.length === 0;
                 }
             }
         };
