@@ -1,13 +1,12 @@
 ﻿import util = require("./util");
 
-module SquadController {
+@util.profilePrototype("SquadController")
+class SquadController {
 
-    class SquadController {
+    public run() {
 
-        @util.controllerTicker()
-        private static run() {
-
-        }
     }
 }
-export = SquadController;
+
+const instance = new SquadController();
+export = instance;

@@ -1,4 +1,11 @@
 "use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var util = require("./util");
 /**
  * Responsible for looking after the sector system.
  */
@@ -29,7 +36,7 @@ var SectorController = (function () {
     /**
      * Runs an update tick for ALL sectors for ALL rooms
      */
-    SectorController.prototype.tick = function () {
+    SectorController.prototype.run = function () {
         // Normalise sector priorities if needed
         if (!this._prioritiesNormalised) {
             for (var key in this._sectorMap) {
@@ -98,6 +105,9 @@ var SectorController = (function () {
             sector.sector.tick(room);
         }
     };
+    SectorController = __decorate([
+        util.profilePrototype("SectorController")
+    ], SectorController);
     return SectorController;
 }());
 var instance = new SectorController();

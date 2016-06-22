@@ -251,4 +251,8 @@ module.exports = {
     registerFN(fn, functionName) {
         return profileFunction(fn, functionName);
     },
+
+    registerPrototype(prototypename, prototype) {
+        Profiler.prototypes.push({ name: prototypename, val: prototype })
+    },
 };

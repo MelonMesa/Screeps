@@ -1,14 +1,12 @@
 "use strict";
+var profiler = require('./screeps-profiler');
 var Util;
 (function (Util) {
+    ;
     /**
      *  All registered roles.
     **/
     Util.roles = {};
-    /**
-     *  All registered controllers.
-    **/
-    Util.controllers = [];
     /**
      * Logs the specified error.
      * @param error
@@ -59,10 +57,12 @@ var Util;
         };
     }
     Util.creepTicker = creepTicker;
-    function controllerTicker() {
-        return function (target, propertyKey, descriptor) { Util.controllers.push(target[propertyKey]); };
+    function profilePrototype(name) {
+        return function (target) {
+            profiler.registerPrototype(name, target.prototype);
+        };
     }
-    Util.controllerTicker = controllerTicker;
+    Util.profilePrototype = profilePrototype;
     function QuickFindAny(creep, type, memoryname, opts) {
         if (!creep.memory[memoryname]) {
             var obj_1 = creep.room.find(type, opts)[0];

@@ -64,6 +64,9 @@ var Role;
             __decorate([
                 util.creepTicker(Scout_1.role)
             ], Scout, "run", null);
+            Scout = __decorate([
+                util.profilePrototype("Role.Scout")
+            ], Scout);
             return Scout;
         }());
     })(Scout = Role.Scout || (Role.Scout = {}));

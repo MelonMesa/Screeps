@@ -1,6 +1,7 @@
 ﻿import util = require("./util");
 import BaseSector = require("./BaseSector");
 
+@util.profilePrototype("EconomySector")
 class EconomySector extends BaseSector {
     constructor() {
         super("economy");

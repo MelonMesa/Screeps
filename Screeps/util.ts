@@ -1,7 +1,9 @@
-﻿module Util {
+﻿var profiler = require('./screeps-profiler');
+
+module Util {
 
     export type CreepTicker = (creep: Creep) => void;
-    export type Ticker = () => void;
+    export type methodProfile = () => void;;
 
     export interface RoleDetails {
         /** Name of the role. */
@@ -28,11 +30,6 @@
      *  All registered roles.
     **/
     export const roles: { [name: string]: { role: RoleDetails, ticker: CreepTicker } } = {};
-
-    /**
-     *  All registered controllers.
-    **/
-    export const controllers: Ticker[] = []
 
     /**
      * Logs the specified error.
@@ -81,9 +78,10 @@
         };
     }
 
-    export function controllerTicker(): MethodDecorator {
-        return function (target: Object, propertyKey: string, descriptor: PropertyDescriptor)
-        { controllers.push(target[propertyKey]); };
+    export function profilePrototype(name: string): ClassDecorator {
+        return function (target: Function) {
+            profiler.registerPrototype(name, target.prototype);
+        };
     }
 
     export function QuickFindAny<T>(creep: Creep, type: number, memoryname: string, opts?: { filter: any | string; }): T {

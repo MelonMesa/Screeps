@@ -25,6 +25,7 @@ interface SpawnControllerMemory {
     nextRequestID: number;
 }
 
+@util.profilePrototype("SpawnController")
 class SpawnController {
 
     private getMemory(): SpawnControllerMemory {
@@ -59,6 +60,7 @@ class SpawnController {
     }
 
     public run() {
+
         const memory = this.getMemory();
 
         // Iterate each spawn request

@@ -34,6 +34,7 @@ module Role.Scout {
         memory: any;
     }
 
+    @util.profilePrototype("Role.Scout")
     class Scout {
         /**
          * Runs the harvester role

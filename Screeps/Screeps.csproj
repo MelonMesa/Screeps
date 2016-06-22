@@ -22,6 +22,7 @@
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="screeps-profiler.js" />
     <Content Include="tsconfig.json" />
   </ItemGroup>
   <ItemGroup>
@@ -42,6 +43,7 @@
     <TypeScriptCompile Include="Sector_Economy.ts" />
     <TypeScriptCompile Include="SectorController.ts" />
     <TypeScriptCompile Include="SpawnController.ts" />
+    <TypeScriptCompile Include="SquadController.ts" />
     <TypeScriptCompile Include="util.ts" />
   </ItemGroup>
   <PropertyGroup>

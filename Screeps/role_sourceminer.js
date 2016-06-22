@@ -68,6 +68,9 @@ var Role;
             __decorate([
                 util.creepTicker(SourceMiner_1.role)
             ], SourceMiner, "run", null);
+            SourceMiner = __decorate([
+                util.profilePrototype("Role.SourceMiner")
+            ], SourceMiner);
             return SourceMiner;
         }());
     })(SourceMiner = Role.SourceMiner || (Role.SourceMiner = {}));

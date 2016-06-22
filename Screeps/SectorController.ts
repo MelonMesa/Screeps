@@ -4,6 +4,7 @@ import BaseSector = require("./BaseSector");
 /**
  * Responsible for looking after the sector system.
  */
+@util.profilePrototype("SectorController")
 class SectorController {
     private _sectorMap: {
         [name: string]: {
@@ -42,7 +43,7 @@ class SectorController {
     /**
      * Runs an update tick for ALL sectors for ALL rooms
      */
-    public tick() {
+    public run() {
         // Normalise sector priorities if needed
         if (!this._prioritiesNormalised) {
             for (var key in this._sectorMap) {

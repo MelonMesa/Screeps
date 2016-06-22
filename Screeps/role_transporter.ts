@@ -19,6 +19,7 @@ module Role.Transporter {
         return util.spawnCreep(role, spawnName, creepName);
     }
 
+    @util.profilePrototype("Role.Transporter")
     class Transporter {
         /**
          * Runs the harvester role

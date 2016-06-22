@@ -50,6 +50,9 @@ var Role;
             __decorate([
                 util.creepTicker(Harvester_1.role)
             ], Harvester, "run", null);
+            Harvester = __decorate([
+                util.profilePrototype("Role.Harvester")
+            ], Harvester);
             return Harvester;
         }());
     })(Harvester = Role.Harvester || (Role.Harvester = {}));

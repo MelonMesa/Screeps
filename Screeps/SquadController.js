@@ -6,18 +6,16 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 var util = require("./util");
-var SquadController;
-(function (SquadController_1) {
-    var SquadController = (function () {
-        function SquadController() {
-        }
-        SquadController.run = function () {
-        };
-        __decorate([
-            util.controllerTicker()
-        ], SquadController, "run", null);
-        return SquadController;
-    }());
-})(SquadController || (SquadController = {}));
-module.exports = SquadController;
+var SquadController = (function () {
+    function SquadController() {
+    }
+    SquadController.prototype.run = function () {
+    };
+    SquadController = __decorate([
+        util.profilePrototype("SquadController")
+    ], SquadController);
+    return SquadController;
+}());
+var instance = new SquadController();
+module.exports = instance;
 //# sourceMappingURL=SquadController.js.map

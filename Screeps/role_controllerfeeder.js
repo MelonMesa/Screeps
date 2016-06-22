@@ -63,6 +63,9 @@ var Role;
             __decorate([
                 util.creepTicker(ControllerFeeder_1.role)
             ], ControllerFeeder, "run", null);
+            ControllerFeeder = __decorate([
+                util.profilePrototype("Role.ControllerFeeder")
+            ], ControllerFeeder);
             return ControllerFeeder;
         }());
     })(ControllerFeeder = Role.ControllerFeeder || (Role.ControllerFeeder = {}));

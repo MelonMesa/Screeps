@@ -19,6 +19,7 @@ module Role.ControllerFeeder {
         return util.spawnCreep(role, spawnName, creepName);
     }
 
+    @util.profilePrototype("Role.ControllerFeeder")
     class ControllerFeeder {
         /**
          * Runs the controller-feeder role

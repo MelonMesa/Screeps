@@ -5,6 +5,7 @@ var profiler = require('./screeps-profiler');
 import sectorController = require("./SectorController");
 import spawnController = require("./SpawnController");
 import roomController = require("./RoomController");
+import squadController = require("./SquadController");
 
 import EconomySector = require("./Sector_Economy");
 sectorController.registerSector(EconomySector, 100);
@@ -31,11 +32,12 @@ module Main {
     }
 
     function Logic() {
-        // the inconsistency is real
-        sectorController.tick();
+
+        // the consistency is real
+        roomController.run();
+        sectorController.run();
         spawnController.run();
-        for (var i = 0; i < util.controllers.length; i++)
-            util.controllers[i]();
+        squadController.run();
 
         // Iterate all creeps
         for (var name in Game.creeps) {
@@ -55,6 +57,8 @@ module Main {
             }
         }
     }
+
+    profiler.registerFN(Logic, "Logic");
 }
 
 export = Main;

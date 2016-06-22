@@ -17,12 +17,14 @@ module Role.Builder {
     **/
     export function spawn(spawnName: string, creepName?: string): string | number {
         return util.spawnCreep(role, spawnName, creepName);
+        
     }
 
     interface BuilderMemory extends util.CreepMemory {
         target?: string;
     }
 
+    @util.profilePrototype("Role.Builder")
     class Builder {
         /**
          * Runs the builder role

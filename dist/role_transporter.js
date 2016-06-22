@@ -69,6 +69,9 @@ var Role;
             __decorate([
                 util.creepTicker(Transporter_1.role)
             ], Transporter, "run", null);
+            Transporter = __decorate([
+                util.profilePrototype("Role.Transporter")
+            ], Transporter);
             return Transporter;
         }());
     })(Transporter = Role.Transporter || (Role.Transporter = {}));

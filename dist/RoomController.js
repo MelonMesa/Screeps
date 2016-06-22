@@ -6,27 +6,20 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 var util = require("./util");
-var RoomController;
-(function (RoomController_1) {
-    var RoomController = (function () {
-        function RoomController() {
-        }
-        RoomController.run = function () {
-            for (var roomname in Game.rooms) {
-                var room = Game.rooms[roomname];
-                var memory = room.memory;
-                if (memory.sources == null || memory.noSources) {
-                    memory.sources = findSources(room);
-                    memory.noSources = memory.sources == null || memory.sources.length === 0;
-                }
+var RoomController = (function () {
+    function RoomController() {
+    }
+    RoomController.prototype.run = function () {
+        for (var roomname in Game.rooms) {
+            var room = Game.rooms[roomname];
+            var memory = room.memory;
+            if (memory.sources == null || memory.noSources) {
+                memory.sources = this.findSources(room);
+                memory.noSources = memory.sources == null || memory.sources.length === 0;
             }
-        };
-        __decorate([
-            util.controllerTicker()
-        ], RoomController, "run", null);
-        return RoomController;
-    }());
-    function findSources(room) {
+        }
+    };
+    RoomController.prototype.findSources = function (room) {
         var memories = [];
         var sources = room.find(FIND_SOURCES);
         if (!sources)
@@ -45,7 +38,12 @@ var RoomController;
             memories.push({ name: source.id, workersMax: workSpotCount, currentWorkers: [] });
         }
         return memories;
-    }
-})(RoomController || (RoomController = {}));
-module.exports = RoomController;
+    };
+    RoomController = __decorate([
+        util.profilePrototype("RoomController")
+    ], RoomController);
+    return RoomController;
+}());
+var instance = new RoomController();
+module.exports = instance;
 //# sourceMappingURL=RoomController.js.map

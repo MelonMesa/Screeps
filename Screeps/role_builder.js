@@ -83,6 +83,9 @@ var Role;
             __decorate([
                 util.creepTicker(Builder_1.role)
             ], Builder, "run", null);
+            Builder = __decorate([
+                util.profilePrototype("Role.Builder")
+            ], Builder);
             return Builder;
         }());
     })(Builder = Role.Builder || (Role.Builder = {}));

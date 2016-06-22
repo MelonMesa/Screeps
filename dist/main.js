@@ -3,6 +3,8 @@ var util = require("./util");
 var profiler = require('./screeps-profiler');
 var sectorController = require("./SectorController");
 var spawnController = require("./SpawnController");
+var roomController = require("./RoomController");
+var squadController = require("./SquadController");
 var EconomySector = require("./Sector_Economy");
 sectorController.registerSector(EconomySector, 100);
 var activeRoles = ["harvester", "controllerfeeder", "scout", "builder", "transporter", "sourceminer"];
@@ -25,11 +27,11 @@ var Main;
     }
     Main.loop = loop;
     function Logic() {
-        // the inconsistency is real
-        sectorController.tick();
+        // the consistency is real
+        roomController.run();
+        sectorController.run();
         spawnController.run();
-        for (var i = 0; i < util.controllers.length; i++)
-            util.controllers[i]();
+        squadController.run();
         // Iterate all creeps
         for (var name in Game.creeps) {
             // Get creep
@@ -48,6 +50,7 @@ var Main;
             }
         }
     }
+    profiler.registerFN(Logic, "Logic");
 })(Main || (Main = {}));
 module.exports = Main;
 //# sourceMappingURL=main.js.map

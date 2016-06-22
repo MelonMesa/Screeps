@@ -1,25 +1,20 @@
 ﻿import util = require("./util");
 
-module RoomController {
+@util.profilePrototype("RoomController")
+class RoomController {
+    public run() {
+        for(const roomname in Game.rooms) {
+            const room = Game.rooms[roomname];
 
-    class RoomController {
-
-        @util.controllerTicker()
-        private static run() {
-            for(const roomname in Game.rooms) {
-                const room = Game.rooms[roomname];
-
-                const memory: RoomMemory = room.memory;
-                if (memory.sources == null || memory.noSources) {
-                    memory.sources = findSources(room);
-                    memory.noSources = memory.sources == null || memory.sources.length === 0;
-                }
+            const memory: RoomMemory = room.memory;
+            if (memory.sources == null || memory.noSources) {
+                memory.sources = this.findSources(room);
+                memory.noSources = memory.sources == null || memory.sources.length === 0;
             }
         }
-
     }
 
-    function findSources(room: Room): SourceMemory[] {
+    private findSources(room: Room): SourceMemory[] {
         var memories: SourceMemory[] = [];
         const sources = room.find<Source>(FIND_SOURCES);
         if (!sources) return null;;
@@ -34,9 +29,12 @@ module RoomController {
                         workSpotCount++;
                 }
             }
-            memories.push( { name: source.id, workersMax: workSpotCount, currentWorkers: [] });
+            memories.push({ name: source.id, workersMax: workSpotCount, currentWorkers: [] });
         }
         return memories;
     }
+
 }
-export = RoomController;
+
+const instance = new RoomController();
+export = instance;

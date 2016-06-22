@@ -25,6 +25,7 @@ module Role.SourceMiner {
         findSleepTime: number;
     }
 
+    @util.profilePrototype("Role.SourceMiner")
     class SourceMiner {
 
         /**

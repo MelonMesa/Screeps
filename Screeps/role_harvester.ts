@@ -19,6 +19,7 @@ module Role.Harvester {
         return util.spawnCreep(role, spawnName, creepName);
     }
 
+    @util.profilePrototype("Role.Harvester")
     class Harvester {
         /**
          * Runs the harvester role
