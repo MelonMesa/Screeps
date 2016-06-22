@@ -57,8 +57,6 @@ module Main {
             }
         }
     }
-
-    profiler.registerFN(Logic, "Logic");
 }
 
 export = Main;

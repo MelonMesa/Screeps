@@ -49,8 +49,8 @@ var Main;
                 }
             }
         }
+        console.log(Game.cpu.getUsed());
     }
-    profiler.registerFN(Logic, "Logic");
 })(Main || (Main = {}));
 module.exports = Main;
 //# sourceMappingURL=main.js.map
