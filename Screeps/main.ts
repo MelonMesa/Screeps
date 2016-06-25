@@ -1,18 +1,14 @@
-﻿import util = require("./util");
+﻿/// <reference path="Util.ts" />
 
-var profiler = require('./screeps-profiler');
+/// <reference path="Roles/Base.ts" />
 
-import sectorController = require("./SectorController");
-import spawnController = require("./SpawnController");
-import roomController = require("./RoomController");
+/// <reference path="Controllers/Room.ts" />
+/// <reference path="Controllers/Sector.ts" />
+/// <reference path="Controllers/Spawn.ts" />
 
-import EconomySector = require("./Sector_Economy");
-sectorController.registerSector(EconomySector, 100);
+/// <reference path="Sectors/Economy.ts" />
 
-const activeRoles = ["harvester", "controllerfeeder", "scout", "builder", "transporter", "sourceminer"];
-for (var i = 0; i < activeRoles.length; i++) {
-    require(`./role_${activeRoles[i]}`);
-}
+const profiler = require('./screeps-profiler');
 
 var debugmode = false;
 
@@ -31,24 +27,23 @@ module Main {
     }
 
     function Logic() {
-        // the inconsistency is real
-        sectorController.tick();
-        spawnController.run();
-        for (var i = 0; i < util.controllers.length; i++)
-            util.controllers[i]();
+        // Run controllers
+        Controllers.room.run();
+        Controllers.spawn.run();
+        Controllers.sector.run();
 
-        // Iterate all creeps
+        // Run creeps
         for (var name in Game.creeps) {
             // Get creep
             const creep = Game.creeps[name];
             if (!creep.spawning) {
                 // Get memory and role
-                const mem: util.CreepMemory = creep.memory;
-                const roleInfo = util.roles[mem.role];
+                const mem: Util.CreepMemory = creep.memory;
+                const role = Roles.get(mem.role);
 
                 // Tick
-                if (roleInfo) {
-                    roleInfo.ticker(creep);
+                if (role) {
+                    role.run(creep);
                 } else {
                     console.log(`${creep.name} Unknown role ${mem.role}`);
                 }
@@ -57,4 +52,4 @@ module Main {
     }
 }
 
-export = Main;
+module.exports = Main;

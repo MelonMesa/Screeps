@@ -29,20 +29,20 @@
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="main.ts" />
-    <TypeScriptCompile Include="role_builder.ts" />
-    <TypeScriptCompile Include="role_controllerfeeder.ts" />
-    <TypeScriptCompile Include="role_harvester.ts" />
-    <TypeScriptCompile Include="role_sourceminer.ts" />
-    <TypeScriptCompile Include="role_scout.ts" />
-    <TypeScriptCompile Include="role_transporter.ts" />
+    <TypeScriptCompile Include="Roles\Base.ts" />
+    <TypeScriptCompile Include="Roles\Builder.ts" />
+    <TypeScriptCompile Include="Roles\ControllerFeeder.ts" />
+    <TypeScriptCompile Include="Roles\SourceMiner.ts" />
+    <TypeScriptCompile Include="Roles\Scout.ts" />
+    <TypeScriptCompile Include="Roles\Hauler.ts" />
     <TypeScriptCompile Include="IRoom.ts" />
     <TypeScriptCompile Include="screeps.d.ts" />
-    <TypeScriptCompile Include="RoomController.ts" />
-    <TypeScriptCompile Include="BaseSector.ts" />
-    <TypeScriptCompile Include="Sector_Economy.ts" />
-    <TypeScriptCompile Include="SectorController.ts" />
-    <TypeScriptCompile Include="SpawnController.ts" />
-    <TypeScriptCompile Include="util.ts" />
+    <TypeScriptCompile Include="Controllers\Room.ts" />
+    <TypeScriptCompile Include="Sectors\Base.ts" />
+    <TypeScriptCompile Include="Sectors\Economy.ts" />
+    <TypeScriptCompile Include="Controllers\Sector.ts" />
+    <TypeScriptCompile Include="Controllers\Spawn.ts" />
+    <TypeScriptCompile Include="Util.ts" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">12.0</VisualStudioVersion>
@@ -93,8 +93,7 @@
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets')" />
   <PropertyGroup>
-    <PostBuildEvent>copy "$(ProjectDir)\*.js" "$(ProjectDir)\..\dist\"
-grunt screeps
+    <PostBuildEvent>
 </PostBuildEvent>
   </PropertyGroup>
 </Project>

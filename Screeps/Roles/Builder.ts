@@ -1,35 +1,26 @@
-﻿import util = require("./util");
+﻿/// <reference path="../Util.ts" />
+/// <reference path="Base.ts" />
 
-module Role.Builder {
-    /**
-     * Details for the "builder" role.
-    **/
-    export const role: util.RoleDetails =
-        {
-            name: "builder",
-            bodies: [ [WORK, CARRY, MOVE] ]
-        };
-
-    /**
-     * Spawns a builder creep.
-     * @param spawnName
-     * @param creepName
-    **/
-    export function spawn(spawnName: string, creepName?: string): string | number {
-        return util.spawnCreep(role, spawnName, creepName);
+module Roles {
+    interface BuilderMemory extends Util.CreepMemory {
+        target: string;
     }
 
-    interface BuilderMemory extends util.CreepMemory {
-        target?: string;
-    }
+    export class Builder extends Base {
+        constructor() {
+            super();
 
-    class Builder {
+            this._name = "builder";
+            this.bodies = [
+                [WORK, CARRY, MOVE]
+            ];
+        }
+
         /**
-         * Runs the builder role
+         * Runs role logic for one creep.
          * @param creep
         **/
-        @util.creepTicker(role)
-        protected static run(creep: Creep) {
+        public run(creep: Creep): void {
             if (creep.carry.energy > 0) {
                 // find closest construction site
                 //Game.getObjectById(
@@ -48,19 +39,19 @@ module Role.Builder {
                         creep.moveTo(target);
                         break;
                     case ERR_INVALID_TARGET:
-                        util.logError(`Builder.run: Got ERR_INVALID_TARGET ${err} when building! Target is ${target}`);
+                        Util.logError(`Builder.run: Got ERR_INVALID_TARGET ${err} when building! Target is ${target}`);
                         memory.target = null;
                         break;
                     case OK:
                         break;
                     default:
-                        util.logError(`Builder.run: Unhandled error code ${err} when building!`);
+                        Util.logError(`Builder.run: Unhandled error code ${err} when building!`);
                         break;
                 }
             }
             else {
 
-                const spawndropsite = util.QuickFindAny<Spawn>(creep, FIND_MY_SPAWNS, "transportspawn", {
+                const spawndropsite = Util.quickFindAny<Spawn>(creep, FIND_MY_SPAWNS, "transportspawn", {
                     filter: (spawn) => {
                         return spawn.energy > 250;
                     }
@@ -79,6 +70,6 @@ module Role.Builder {
             return pos.findClosestByPath<ConstructionSite>(FIND_MY_CONSTRUCTION_SITES);
         }
     }
-}
 
-export = Role.Builder;
+    register(new Builder());
+}

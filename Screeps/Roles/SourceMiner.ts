@@ -1,38 +1,27 @@
-﻿import util = require("./util");
+﻿/// <reference path="../Util.ts" />
+/// <reference path="Base.ts" />
 
-module Role.SourceMiner {
-
-    /**
-     * Details for the "harvester" role.
-    **/
-    export const role: util.RoleDetails =
-        {
-            name: "miner",
-            bodies: [ [WORK, MOVE] ]
-        };
-
-    /**
-     * Spawns a harvester creep.
-     * @param spawnName
-     * @param creepName
-    **/
-    export function spawn(spawnName: string, creepName?: string): string | number {
-        return util.spawnCreep(role, spawnName, creepName);
-    }
-
-    interface MinerMemory {
+module Roles {
+    interface MinerMemory extends Util.CreepMemory {
         source?: string;
         findSleepTime: number;
     }
 
-    class SourceMiner {
+    export class SourceMiner extends Base {
+        constructor() {
+            super();
+
+            this._name = "sourceminer";
+            this.bodies = [
+                [WORK, CARRY, MOVE]
+            ];
+        }
 
         /**
-         * Runs the harvester role
+         * Runs role logic for one creep.
          * @param creep
         **/
-        @util.creepTicker(role)
-        protected static run(creep: Creep) {
+        public run(creep: Creep): void {
             const roommemory: RoomMemory = creep.room.memory;
             const minermemory: MinerMemory = creep.memory;
 
@@ -73,6 +62,6 @@ module Role.SourceMiner {
         }
 
     }
-}
 
-export = Role.SourceMiner;
+    register(new SourceMiner());
+}

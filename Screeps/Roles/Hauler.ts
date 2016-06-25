@@ -1,33 +1,25 @@
-﻿import util = require("./util");
+﻿/// <reference path="../Util.ts" />
+/// <reference path="Base.ts" />
 
-module Role.Transporter {
-    /**
-     * Details for the "harvester" role.
-    **/
-    export const role: util.RoleDetails =
-        {
-            name: "transporter",
-            bodies: [ [CARRY, CARRY, MOVE] ]
-        };
+module Roles {
 
-    /**
-     * Spawns a harvester creep.
-     * @param spawnName
-     * @param creepName
-    **/
-    export function spawn(spawnName: string, creepName?: string): string | number {
-        return util.spawnCreep(role, spawnName, creepName);
-    }
+    export class Hauler extends Base {
+        constructor() {
+            super();
 
-    class Transporter {
+            this._name = "hauler";
+            this.bodies = [
+                [WORK, CARRY, MOVE]
+            ];
+        }
+
         /**
-         * Runs the harvester role
+         * Runs role logic for one creep.
          * @param creep
         **/
-        @util.creepTicker(role)
-        protected static run(creep: Creep) {
+        public run(creep: Creep): void {
 
-            const energyresource = util.QuickFindAny<Resource>(creep, FIND_DROPPED_RESOURCES, "transportsource", {
+            const energyresource = Util.quickFindAny<Resource>(creep, FIND_DROPPED_RESOURCES, "transportsource", {
                 filter: { resourceType: RESOURCE_ENERGY }
             });
 
@@ -39,13 +31,13 @@ module Role.Transporter {
                 }
             }
             else {
-                const spawndropsite = util.QuickFindAny<Spawn>(creep, FIND_MY_SPAWNS, "transportspawn");
+                const spawndropsite = Util.quickFindAny<Spawn>(creep, FIND_MY_SPAWNS, "transportspawn");
                 if (!spawndropsite) return;
 
                 if (spawndropsite.energy >= spawndropsite.energyCapacity) {
                     // Need lodash.sum for structure.store
                     // ((structure.structureType == STRUCTURE_STORAGE || structure.structuretype == STRUCTURE_CONTAINER) && structure.store < structure.storeCapacity)
-                    const dropsite = util.QuickFindAny<Structure>(creep, FIND_MY_STRUCTURES, "transportdropsite", {
+                    const dropsite = Util.quickFindAny<Structure>(creep, FIND_MY_STRUCTURES, "transportdropsite", {
                         filter: (structure) => {
                             return (structure.structureType == STRUCTURE_EXTENSION && structure.energy < structure.energyCapacity) ||
                                 ((structure.structureType == STRUCTURE_STORAGE || structure.structuretype == STRUCTURE_CONTAINER) && structure.store.energy < structure.storeCapacity);
@@ -62,6 +54,6 @@ module Role.Transporter {
             }
         }
     }
-}
 
-export = Role.Transporter;
+    register(new Hauler());
+}

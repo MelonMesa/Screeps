@@ -1,31 +1,22 @@
-﻿import util = require("./util");
+﻿/// <reference path="../Util.ts" />
+/// <reference path="Base.ts" />
 
-module Role.ControllerFeeder {
-    /**
-     * Details for the "controllerfeeder" role.
-    **/
-    export const role: util.RoleDetails =
-        {
-            name: "controllerfeeder",
-            bodies: [ [WORK, CARRY, MOVE] ]
-        };
+module Roles {
+    export class ControllerFeeder extends Base {
+        constructor() {
+            super();
 
-    /**
-     * Spawns a controller-feeder creep.
-     * @param spawnName
-     * @param creepName
-    **/
-    export function spawn(spawnName: string, creepName?: string): string | number {
-        return util.spawnCreep(role, spawnName, creepName);
-    }
+            this._name = "cfeeder";
+            this.bodies = [
+                [WORK, CARRY, MOVE]
+            ];
+        }
 
-    class ControllerFeeder {
         /**
-         * Runs the controller-feeder role
+         * Runs role logic for one creep.
          * @param creep
         **/
-        @util.creepTicker(role)
-        protected static run(creep: Creep) {
+        public run(creep: Creep): void {
             if (creep.carry.energy > 0) {
                 const controller = creep.room.controller;
                 if (creep.upgradeController(controller) == ERR_NOT_IN_RANGE) {
@@ -33,7 +24,7 @@ module Role.ControllerFeeder {
                 }
             }
             else {
-                const pickupsite = util.QuickFindAny<any>(creep, FIND_MY_STRUCTURES, "feederspawn", {
+                const pickupsite = Util.quickFindAny<any>(creep, FIND_MY_STRUCTURES, "feederspawn", {
                     filter: (structure) => {
                         return (structure.structureType == STRUCTURE_EXTENSION && structure.energy > 0);
                     }
@@ -55,6 +46,6 @@ module Role.ControllerFeeder {
             }
         }
     }
-}
 
-export = Role.ControllerFeeder;
+    register(new ControllerFeeder());
+}

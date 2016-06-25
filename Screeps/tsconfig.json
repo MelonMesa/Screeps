@@ -1,11 +1,12 @@
 ﻿{
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "system",
     "noImplicitAny": false,
     "preserveConstEnums": true,
-    "sourceMap": true,
+    "sourceMap": false,
     "target": "es5",
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "outFile": "../dist/main.js"
   },
   "exclude": [
     "node_modules"
