@@ -1,16 +1,19 @@
 ﻿/// <reference path="../Util.ts" />
 /// <reference path="Base.ts" />
 
+/// <reference path="../Roles/Hauler.ts" />
+
 module Sectors {
 
     export interface EconomySectorMemory extends SectorMemory {
-
+        /** Are we currently spawning a creep? */
+        spawning: boolean;
     }
 
     export class EconomySector extends Base {
         /**
          * The economy sector is responsible for mining energy sources and transporting the energy back to storage.
-         * It's job is to maintain the maximum number of "miner" creeps that a room can sustain.
+         * It's job is to maintain the maximum number of "sourceminer" creeps that a room can sustain.
          * It should also create and maintain a "hauler" creep that is paired to each "miner" creep.
         **/
 
@@ -24,7 +27,7 @@ module Sectors {
          * @param room      Room reference or name.
          */
         public getMemory(room: string | Room): EconomySectorMemory {
-            return super.getMemory(room);
+            return <EconomySectorMemory>super.getMemory(room);
         }
 
         /**
@@ -32,8 +35,8 @@ module Sectors {
          * @param room
          * @param mem
          */
-        protected onCreated(room: Room, mem: SectorMemory): void {
-
+        protected onCreated(room: Room, mem: EconomySectorMemory): void {
+            mem.spawning = false;
         }
 
         /**
@@ -41,14 +44,27 @@ module Sectors {
          * @param room
          */
         public tick(room: Room): void {
+            // Run spawn logic
+            const mem = this.getMemory(room);
+            if (!mem.spawning) {
+                this.runSpawnLogic(room);
+            }
+        }
+
+        private runSpawnLogic(room: Room): void {
             // Get all creeps for this room
             const creeps = this.getCreeps(room);
-            const miners = creeps.filter(c => (<Util.CreepMemory>c.memory).role === "miner");
+            const miners = creeps.filter(c => (<Util.CreepMemory>c.memory).role === "sourceminer");
             const haulers = creeps.filter(c => (<Util.CreepMemory>c.memory).role === "hauler");
+
+            // If there are less haulers then miners, we should spawn one and assign it to whichever miner doesn't have one assigned
+            if (haulers.length < miners.length) {
+                // Find the miner which has no hauler assigned
+            }
 
             // Get all sources
             const roomMem: RoomMemory = room.memory;
-            //roomMem.sources[0].
+            const totalMinerCount = roomMem.sources.map(s => s.workersMax).reduce((a, b) => a + b);
         }
     }
 

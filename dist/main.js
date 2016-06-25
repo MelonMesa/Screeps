@@ -416,7 +416,7 @@ var Sectors;
         __extends(EconomySector, _super);
         /**
          * The economy sector is responsible for mining energy sources and transporting the energy back to storage.
-         * It's job is to maintain the maximum number of "miner" creeps that a room can sustain.
+         * It's job is to maintain the maximum number of "sourceminer" creeps that a room can sustain.
          * It should also create and maintain a "hauler" creep that is paired to each "miner" creep.
         **/
         function EconomySector() {
@@ -444,11 +444,12 @@ var Sectors;
         EconomySector.prototype.tick = function (room) {
             // Get all creeps for this room
             var creeps = this.getCreeps(room);
-            var miners = creeps.filter(function (c) { return c.memory.role === "miner"; });
+            var miners = creeps.filter(function (c) { return c.memory.role === "sourceminer"; });
             var haulers = creeps.filter(function (c) { return c.memory.role === "hauler"; });
+            // If there are less haulers then miners, we should spawn one and assign it to whichever miner
             // Get all sources
             var roomMem = room.memory;
-            //roomMem.sources[0].
+            var totalMinerCount = roomMem.sources.map(function (s) { return s.workersMax; }).reduce(function (a, b) { return a + b; });
         };
         return EconomySector;
     }(Sectors.Base));
