@@ -13,7 +13,7 @@ module Sectors {
     export class EconomySector extends Base {
         /**
          * The economy sector is responsible for mining energy sources and transporting the energy back to storage.
-         * It's job is to maintain the maximum number of "sourceminer" creeps that a room can sustain.
+         * It should maintain the maximum number of "miner" creeps that a room can sustain, based on contained energy sources.
          * It should also create and maintain a "hauler" creep that is paired to each "miner" creep.
         **/
 

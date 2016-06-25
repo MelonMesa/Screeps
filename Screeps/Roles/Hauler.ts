@@ -39,14 +39,13 @@ module Roles {
     export interface HaulerMemory extends Util.CreepMemory {
         carryType: string; // RESOURCE_*
         takeFrom: HaulerTakeFrom;
-        takeFromID: string;
+        takeFromSector?: string;
+        takeFromID?: string;
         giveTo: HaulerGiveTo;
-        giveToID: string;
+        giveToID?: string;
         carryBehaviour: HaulerCarryBehaviour;
 
-        state: HaulerState;
-        path: PathStep[];
-        pathTarget: { x: number, y: number };
+        state?: HaulerState;
     }
 
     /**
@@ -54,9 +53,15 @@ module Roles {
      * Lower values are picked first.
      */
     const dropOffStructOrder: { [structType: string]: number } = {
-        [STRUCTURE_SPAWN]: 0
+        [STRUCTURE_SPAWN]: 0,
+        [STRUCTURE_EXTENSION]: 1,
+        [STRUCTURE_CONTAINER]: 2,
+        [STRUCTURE_STORAGE]: 3
     };
 
+    /**
+     * A generic resource hauler creep that can be configured via memory options.
+    **/
     export class Hauler extends Base {
         constructor() {
             super();
@@ -74,6 +79,7 @@ module Roles {
         public run(creep: Creep): void {
 
             const mem: HaulerMemory = creep.memory;
+            var moveCode: Util.FollowPathStatus;
 
             // Switch on creep state
             switch (mem.state || HaulerState.Idle) {
@@ -81,7 +87,8 @@ module Roles {
 
                     const pickupPt = this.findResourcePickup(creep.room, mem);
                     if (pickupPt != null) {
-                        mem.path = creep.room.findPath(creep.pos, pickupPt.pos)
+                        mem.path = creep.room.findPath(creep.pos, pickupPt.pos);
+                        mem.path.pop(); // don't actually step onto the target tile
                         mem.state = HaulerState.PathingToPickup;
                         mem.pathTarget = { x: pickupPt.pos.x, y: pickupPt.pos.y };
                     }
@@ -90,27 +97,20 @@ module Roles {
                 case HaulerState.PathingToPickup:
 
                     // See if we're at destination
-                    if (creep.pos.isNearTo(mem.pathTarget.x, mem.pathTarget.y)) {
-                        // Start collecting
-                        mem.state = HaulerState.Collecting;
-                        delete mem.path;
-                        delete mem.pathTarget;
-                    }
-                    else {
-                        // Move down path
-                        var err: number;
-                        switch (err = creep.moveByPath(mem.path)) {
-                            case OK:
-                            case ERR_TIRED:
-                                break;
-
-                            default:
-                                Util.logError(`Hauler.run: creep.moveByPath returned unhandled error code '${err}'`);
-                                mem.state = HaulerState.Idle;
-                                delete mem.path;
-                                delete mem.pathTarget;
-                                break;
-                        }
+                    moveCode = Util.followPath(creep);
+                    switch (moveCode) {
+                        case Util.FollowPathStatus.Ok:
+                            break;
+                        case Util.FollowPathStatus.Finished:
+                            // Start collecting
+                            mem.state = HaulerState.Collecting;
+                            delete mem.path;
+                            delete mem.pathTarget;
+                            break;
+                        default:
+                            mem.state = HaulerState.Idle;
+                            delete mem.path;
+                            delete mem.pathTarget;
                     }
                     break;
 
@@ -130,7 +130,8 @@ module Roles {
                                 // Drop off
                                 const dropoffPt = this.findResourceDropoff(creep.room, mem);
                                 if (dropoffPt != null) {
-                                    mem.path = creep.room.findPath(creep.pos, dropoffPt.pos)
+                                    mem.path = creep.room.findPath(creep.pos, dropoffPt.pos);
+                                    mem.path.pop(); // don't actually step onto the target tile
                                     mem.state = HaulerState.PathingToDropoff;
                                     mem.pathTarget = { x: dropoffPt.pos.x, y: dropoffPt.pos.y };
                                 }
@@ -143,44 +144,36 @@ module Roles {
                 case HaulerState.PathingToDropoff:
 
                     // See if we're at destination
-                    if (creep.pos.isNearTo(mem.pathTarget.x, mem.pathTarget.y)) {
-                        // Drop off resources
-                        this.give(creep, mem, mem.pathTarget.x, mem.pathTarget.y);
+                    moveCode = Util.followPath(creep);
+                    switch (moveCode) {
+                        case Util.FollowPathStatus.Ok:
+                            break;
+                        case Util.FollowPathStatus.Finished:
+                            // Drop off resources
+                            this.give(creep, mem, mem.pathTarget.x, mem.pathTarget.y);
 
-                        // Do we have more to drop off?
-                        const carried: number = creep.carry[mem.carryType];
-                        if (carried > 0) {
-                            // Drop off again
-                            const dropoffPt = this.findResourceDropoff(creep.room, mem);
-                            if (dropoffPt != null) {
-                                mem.path = creep.room.findPath(creep.pos, dropoffPt.pos)
-                                mem.pathTarget = { x: dropoffPt.pos.x, y: dropoffPt.pos.y };
+                            // Do we have more to drop off?
+                            const carried: number = creep.carry[mem.carryType];
+                            if (carried > 0) {
+                                // Drop off again
+                                const dropoffPt = this.findResourceDropoff(creep.room, mem);
+                                if (dropoffPt != null) {
+                                    mem.path = creep.room.findPath(creep.pos, dropoffPt.pos)
+                                    mem.pathTarget = { x: dropoffPt.pos.x, y: dropoffPt.pos.y };
+                                }
                             }
-                        }
-                        else {
-                            // Clean up path
-                            delete mem.path;
-                            delete mem.pathTarget;
-
-                            // Make us idle
-                            mem.state = HaulerState.Idle;
-                        }
-                    }
-                    else {
-                        // Move down path
-                        var err: number;
-                        switch (err = creep.moveByPath(mem.path)) {
-                            case OK:
-                            case ERR_TIRED:
-                                break;
-
-                            default:
-                                Util.logError(`Hauler.run: creep.moveByPath returned unhandled error code '${err}'`);
-                                mem.state = HaulerState.Idle;
+                            else {
+                                // Clean up path
                                 delete mem.path;
                                 delete mem.pathTarget;
-                                break;
-                        }
+
+                                // Make us idle
+                                mem.state = HaulerState.Idle;
+                            }
+                        default:
+                            mem.state = HaulerState.Idle;
+                            delete mem.path;
+                            delete mem.pathTarget;
                     }
                     break;
             }
@@ -193,7 +186,12 @@ module Roles {
         private findResourcePickup(room: Room, creepMem: HaulerMemory): RoomObject {
             switch (creepMem.takeFrom) {
                 case HaulerTakeFrom.Creep:
-                    return Game.creeps[creepMem.takeFromID];
+                    if (creepMem.takeFromID == null) {
+                        return null;
+                    }
+                    else {
+                        return Game.creeps[creepMem.takeFromID];
+                    }
 
                 default:
                     return null;
@@ -224,11 +222,22 @@ module Roles {
          * @param creepMem
          */
         private take(creep: Creep, creepMem: HaulerMemory): void {
+            const limit = creepMem.sector ? Controllers.sector.getSector(creepMem.sector).getMemory(creep.room).resources.energy : 0;
+
             switch (creepMem.takeFrom) {
                 case HaulerTakeFrom.Creep:
 
                     const targetCreep = Game.creeps[creepMem.takeFromID];
-                    const err = targetCreep.transfer(creep, creepMem.carryType, Math.min(targetCreep.carry[creepMem.carryType], creep.carryCapacity - creep.carry[creepMem.carryType]));
+                    if (!targetCreep) {
+                        Util.logError(`Hauler.take: Target creep no longer exists (probably died)`);
+                        delete creepMem.takeFromID;
+                        creepMem.state = HaulerState.Idle;
+                        break;
+                    }
+
+                    var transferAmount = Math.min(targetCreep.carry[creepMem.carryType], creep.carryCapacity - creep.carry[creepMem.carryType]);
+                    if (limit > 0 && transferAmount > limit) { transferAmount = limit; }
+                    const err = targetCreep.transfer(creep, creepMem.carryType, transferAmount);
                     switch (err) {
                         case OK:
                         case ERR_NOT_ENOUGH_RESOURCES:

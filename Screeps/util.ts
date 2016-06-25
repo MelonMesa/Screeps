@@ -7,6 +7,11 @@
 
         /** Sector name. */
         sector: string;
+
+        /** Current path. */
+        path: PathStep[];
+        /** Current path target. */
+        pathTarget: { x: number, y: number };
     }
 
     /**
@@ -33,6 +38,42 @@
             }
 
             return obj;
+        }
+    }
+
+    /** Results of followPath */
+    export enum FollowPathStatus {
+        /** Creep is moving down path OK. */
+        Ok,
+        /** Creep has no memorised path. */
+        NoPath,
+        /** Unknown error, perform state reset. */
+        Error,
+        /** Reached destination. */
+        Finished
+    }
+
+    /**
+     * Instructs the creep to follow it's memorised path.
+     * Returns true if destination is reached.
+     * @param creep
+    **/
+    export function followPath(creep: Creep): FollowPathStatus {
+        const mem: CreepMemory = creep.memory;
+        if (!mem.path || !mem.pathTarget) {
+            return FollowPathStatus.NoPath;
+        }
+        if (creep.pos.isEqualTo(mem.pathTarget.x, mem.pathTarget.y)) {
+            return FollowPathStatus.Finished;
+        }
+        const err = creep.moveByPath(mem.path);
+        switch (err) {
+            case OK:
+            case ERR_TIRED:
+                return FollowPathStatus.Ok;
+            default:
+                logError(`Util.followPath: Unhandled error code ${err}`);
+                return FollowPathStatus.Error;
         }
     }
 }
