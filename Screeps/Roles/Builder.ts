@@ -11,7 +11,7 @@ module Roles {
             super();
 
             this._name = "builder";
-            this.bodies = [
+            this._bodies = [
                 [WORK, CARRY, MOVE]
             ];
         }

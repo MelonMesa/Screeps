@@ -58,12 +58,12 @@
      * Returns true if destination is reached.
      * @param creep
     **/
-    export function followPath(creep: Creep): FollowPathStatus {
+    export function followPath(creep: Creep, range: number = 0): FollowPathStatus {
         const mem: CreepMemory = creep.memory;
         if (!mem.path || !mem.pathTarget) {
             return FollowPathStatus.NoPath;
         }
-        if (creep.pos.isEqualTo(mem.pathTarget.x, mem.pathTarget.y)) {
+        if (creep.pos.inRangeTo(new RoomPosition(mem.pathTarget.x, mem.pathTarget.y, creep.room.name), range)) {
             return FollowPathStatus.Finished;
         }
         const err = creep.moveByPath(mem.path);

@@ -31,6 +31,43 @@ var Util;
         }
     }
     Util.quickFindAny = quickFindAny;
+    /** Results of followPath */
+    (function (FollowPathStatus) {
+        /** Creep is moving down path OK. */
+        FollowPathStatus[FollowPathStatus["Ok"] = 0] = "Ok";
+        /** Creep has no memorised path. */
+        FollowPathStatus[FollowPathStatus["NoPath"] = 1] = "NoPath";
+        /** Unknown error, perform state reset. */
+        FollowPathStatus[FollowPathStatus["Error"] = 2] = "Error";
+        /** Reached destination. */
+        FollowPathStatus[FollowPathStatus["Finished"] = 3] = "Finished";
+    })(Util.FollowPathStatus || (Util.FollowPathStatus = {}));
+    var FollowPathStatus = Util.FollowPathStatus;
+    /**
+     * Instructs the creep to follow it's memorised path.
+     * Returns true if destination is reached.
+     * @param creep
+    **/
+    function followPath(creep, range) {
+        if (range === void 0) { range = 0; }
+        var mem = creep.memory;
+        if (!mem.path || !mem.pathTarget) {
+            return FollowPathStatus.NoPath;
+        }
+        if (creep.pos.inRangeTo(new RoomPosition(mem.pathTarget.x, mem.pathTarget.y, creep.room.name), range)) {
+            return FollowPathStatus.Finished;
+        }
+        var err = creep.moveByPath(mem.path);
+        switch (err) {
+            case OK:
+            case ERR_TIRED:
+                return FollowPathStatus.Ok;
+            default:
+                logError("Util.followPath: Unhandled error code " + err);
+                return FollowPathStatus.Error;
+        }
+    }
+    Util.followPath = followPath;
 })(Util || (Util = {}));
 /// <reference path="../Util.ts" />
 var Roles;
@@ -143,9 +180,6 @@ var Sectors;
          */
         function Base(name) {
             this._name = name;
-            // Get memory
-            var sectors = Memory["sectors"] || (Memory["sectors"] = {});
-            this._memory = sectors[name] || (sectors[name] = {});
         }
         Object.defineProperty(Base.prototype, "name", {
             /** Gets the name of this sector. */
@@ -162,11 +196,13 @@ var Sectors;
          */
         Base.prototype.getMemory = function (room) {
             var roomID = (typeof room === "string") ? room : room.name;
-            var mem;
-            if (mem = this._memory[roomID]) {
+            var root = Memory["sectors"] || (Memory["sectors"] = {});
+            var sectorRoot = root[this._name] || (root[this._name] = {});
+            var mem = sectorRoot[roomID];
+            if (mem) {
                 return mem;
             }
-            this.onCreated(typeof room === "string" ? Game.rooms[room] : room, mem = this._memory[roomID] = {
+            this.onCreated(typeof room === "string" ? Game.rooms[room] : room, mem = sectorRoot[roomID] = {
                 resources: {
                     energy: 0
                 },
@@ -209,11 +245,18 @@ var Sectors;
             var arr = [];
             for (var key in Game.creeps) {
                 var creep = Game.creeps[key];
-                if (creep.memory.sector === this._name && (creep.room === room || creep.room.name === room)) {
+                if (creep.memory.sector === this._name && (creep.room === room || creep.room.name === room) && creep.my) {
                     arr.push(creep);
                 }
             }
             return arr;
+        };
+        /**
+         * Logs a debug message.
+         * @param message
+         */
+        Base.prototype.log = function (message) {
+            console.log(this._name + ": " + message);
         };
         return Base;
     }());
@@ -310,7 +353,7 @@ var Controllers;
                     if (alloc <= 0)
                         break;
                     var mem = request.sector.getMemory(room);
-                    console.log("Allocated " + alloc + " energy to " + request.sector.name + ", fulfilling " + ((alloc === request.amount) ? "the entire request" : "some of the requested " + request.amount));
+                    //console.log(`Allocated ${alloc} energy to ${request.sector.name}, fulfilling ${(alloc === request.amount) ? "the entire request" : `some of the requested ${request.amount}`}`);
                     mem.requestedResources.energy -= alloc;
                     mem.resources.energy += alloc;
                     energyLeft -= alloc;
@@ -319,6 +362,7 @@ var Controllers;
             // Tick sectors
             for (var key in this._sectorMap) {
                 var sector_2 = this._sectorMap[key];
+                // console.log(`Tick sector '${key}' in room '${room.name}'`);
                 sector_2.sector.tick(room);
             }
         };
@@ -365,6 +409,19 @@ var Controllers;
             });
             return mem.nextRequestID++;
         };
+        /**
+         * Gets if the specified spawn request is still in the spawn queue.
+         * @param requestID
+         */
+        SpawnController.prototype.spawnRequestValid = function (requestID) {
+            return this.getMemory().buildQueue.some(function (r) { return r.requestID === requestID; });
+        };
+        /**
+         * Resets the spawn queue.
+         */
+        SpawnController.prototype.reset = function () {
+            this.getMemory().buildQueue.length = 0;
+        };
         SpawnController.prototype.run = function () {
             var memory = this.getMemory();
             // Iterate each spawn request
@@ -387,16 +444,19 @@ var Controllers;
                             if (err === OK) {
                                 var creepMem = {
                                     role: request.roleName,
-                                    sector: request.sectorName
+                                    sector: request.sectorName,
+                                    path: null,
+                                    pathTarget: null
                                 };
                                 err = spawn_1.createCreep(body, undefined, creepMem);
-                                if (err !== OK) {
+                                if (err !== OK && typeof (err) !== "string") {
                                     Util.logError("Got error code " + err + " when spawning creep '" + request.roleName + "' for sector '" + request.sectorName + "', even though it passed canCreateCreep check");
                                 }
                                 memory.buildQueue.splice(i, 1);
                                 i--;
+                                sector_3.getMemory(room_3).resources.energy -= role.getCreepSpawnCost(request.level);
                             }
-                            else {
+                            else if (err !== ERR_NOT_ENOUGH_ENERGY) {
                                 Util.logError("Got error code " + err + " when checking if it's OK to spawn creep '" + request.roleName + "' for sector '" + request.sectorName + "'");
                             }
                         }
@@ -410,16 +470,347 @@ var Controllers;
 })(Controllers || (Controllers = {}));
 /// <reference path="../Util.ts" />
 /// <reference path="Base.ts" />
+var Roles;
+(function (Roles) {
+    /** The type of creep/object the hauler should pick resource up from. */
+    (function (HaulerTakeFrom) {
+        /** The hauler should take energy from a creep. */
+        HaulerTakeFrom[HaulerTakeFrom["Creep"] = 0] = "Creep";
+    })(Roles.HaulerTakeFrom || (Roles.HaulerTakeFrom = {}));
+    var HaulerTakeFrom = Roles.HaulerTakeFrom;
+    /** The type of creep/object the hauler should drop resource off at. */
+    (function (HaulerGiveTo) {
+        /** The hauler should give energy to generic room storage. */
+        HaulerGiveTo[HaulerGiveTo["Storage"] = 0] = "Storage";
+    })(Roles.HaulerGiveTo || (Roles.HaulerGiveTo = {}));
+    var HaulerGiveTo = Roles.HaulerGiveTo;
+    /** How the hauler should behave when picking up resource. */
+    (function (HaulerCarryBehaviour) {
+        /** Wait until the hauler is at capacity before leaving. */
+        HaulerCarryBehaviour[HaulerCarryBehaviour["WaitUntilFull"] = 0] = "WaitUntilFull";
+    })(Roles.HaulerCarryBehaviour || (Roles.HaulerCarryBehaviour = {}));
+    var HaulerCarryBehaviour = Roles.HaulerCarryBehaviour;
+    /** State that a hauler can be in. */
+    var HaulerState;
+    (function (HaulerState) {
+        /** Hauler is awaiting work. Default state. */
+        HaulerState[HaulerState["Idle"] = 0] = "Idle";
+        /** Hauler is following a path to a resource pickup point. */
+        HaulerState[HaulerState["PathingToPickup"] = 1] = "PathingToPickup";
+        /** Hauler is at resource pickup point and is collecting resource. */
+        HaulerState[HaulerState["Collecting"] = 2] = "Collecting";
+        /** Hauler is following a path to a resource drop-off point. */
+        HaulerState[HaulerState["PathingToDropoff"] = 3] = "PathingToDropoff";
+    })(HaulerState || (HaulerState = {}));
+    /**
+     * How to prioritise energy drop-off structures.
+     * Lower values are picked first.
+     */
+    var dropOffStructOrder = (_a = {},
+        _a[STRUCTURE_SPAWN] = 0,
+        _a[STRUCTURE_EXTENSION] = 1,
+        _a[STRUCTURE_CONTAINER] = 2,
+        _a[STRUCTURE_STORAGE] = 3,
+        _a
+    );
+    /**
+     * A generic resource hauler creep that can be configured via memory options.
+    **/
+    var Hauler = (function (_super) {
+        __extends(Hauler, _super);
+        function Hauler() {
+            _super.call(this);
+            this._name = "hauler";
+            this._bodies = [
+                [WORK, CARRY, MOVE]
+            ];
+        }
+        /**
+         * Runs role logic for one creep.
+         * @param creep
+        **/
+        Hauler.prototype.run = function (creep) {
+            var mem = creep.memory;
+            var moveCode;
+            // Switch on creep state
+            switch (mem.state || HaulerState.Idle) {
+                case HaulerState.Idle:
+                    var pickupPt = this.findResourcePickup(creep.room, mem);
+                    if (pickupPt != null) {
+                        mem.path = creep.room.findPath(creep.pos, pickupPt.pos);
+                        mem.path.pop(); // don't actually step onto the target tile
+                        mem.state = HaulerState.PathingToPickup;
+                        mem.pathTarget = { x: pickupPt.pos.x, y: pickupPt.pos.y };
+                    }
+                    break;
+                case HaulerState.PathingToPickup:
+                    // See if we're at destination
+                    moveCode = Util.followPath(creep, 1);
+                    switch (moveCode) {
+                        case Util.FollowPathStatus.Ok:
+                            break;
+                        case Util.FollowPathStatus.Finished:
+                            // Start collecting
+                            mem.state = HaulerState.Collecting;
+                            delete mem.path;
+                            delete mem.pathTarget;
+                            break;
+                        default:
+                            mem.state = HaulerState.Idle;
+                            delete mem.path;
+                            delete mem.pathTarget;
+                    }
+                    break;
+                case HaulerState.Collecting:
+                    var carried = creep.carry[mem.carryType];
+                    // Switch on pickup behaviour
+                    switch (mem.carryBehaviour) {
+                        case HaulerCarryBehaviour.WaitUntilFull:
+                            if (carried < creep.carryCapacity) {
+                                // Take
+                                this.take(creep, mem);
+                            }
+                            else {
+                                // Drop off
+                                var dropoffPt = this.findResourceDropoff(creep.room, mem);
+                                if (dropoffPt != null) {
+                                    mem.path = creep.room.findPath(creep.pos, dropoffPt.pos);
+                                    mem.path.pop(); // don't actually step onto the target tile
+                                    mem.state = HaulerState.PathingToDropoff;
+                                    mem.pathTarget = { x: dropoffPt.pos.x, y: dropoffPt.pos.y };
+                                }
+                                break;
+                            }
+                            break;
+                    }
+                    break;
+                case HaulerState.PathingToDropoff:
+                    // See if we're at destination
+                    moveCode = Util.followPath(creep, 1);
+                    switch (moveCode) {
+                        case Util.FollowPathStatus.Ok:
+                            break;
+                        case Util.FollowPathStatus.Finished:
+                            // Drop off resources
+                            this.give(creep, mem, mem.pathTarget.x, mem.pathTarget.y);
+                            // Do we have more to drop off?
+                            var carried_1 = creep.carry[mem.carryType];
+                            if (carried_1 > 0) {
+                                // Drop off again
+                                var dropoffPt = this.findResourceDropoff(creep.room, mem);
+                                if (dropoffPt != null) {
+                                    mem.path = creep.room.findPath(creep.pos, dropoffPt.pos);
+                                    mem.pathTarget = { x: dropoffPt.pos.x, y: dropoffPt.pos.y };
+                                }
+                            }
+                            else {
+                                // Clean up path
+                                delete mem.path;
+                                delete mem.pathTarget;
+                                // Make us idle
+                                mem.state = HaulerState.Idle;
+                            }
+                        default:
+                            mem.state = HaulerState.Idle;
+                            delete mem.path;
+                            delete mem.pathTarget;
+                    }
+                    break;
+            }
+        };
+        /**
+         * Finds the resource pickup object for the specified hauler.
+         * @param creepMem
+         */
+        Hauler.prototype.findResourcePickup = function (room, creepMem) {
+            switch (creepMem.takeFrom) {
+                case HaulerTakeFrom.Creep:
+                    if (creepMem.takeFromID == null) {
+                        return null;
+                    }
+                    else {
+                        return Game.creeps[creepMem.takeFromID];
+                    }
+                default:
+                    return null;
+            }
+        };
+        /**
+         * Finds the resource dropoff object for the specified hauler.
+         * @param creepMem
+         */
+        Hauler.prototype.findResourceDropoff = function (room, creepMem) {
+            switch (creepMem.giveTo) {
+                case HaulerGiveTo.Storage:
+                    var possibilities = room.find(FIND_MY_STRUCTURES, {
+                        filter: function (structure) {
+                            return (structure.structureType == STRUCTURE_EXTENSION && structure.energy < structure.energyCapacity) ||
+                                ((structure.structureType == STRUCTURE_STORAGE || structure.structuretype == STRUCTURE_CONTAINER) && structure.store.energy < structure.storeCapacity);
+                        }
+                    });
+                    possibilities.sort(function (a, b) { return dropOffStructOrder[a.structureType] - dropOffStructOrder[b.structureType]; });
+                    return possibilities[0];
+            }
+        };
+        /**
+         * Makes the specified hauler attempt to take resources.
+         * @param creep
+         * @param creepMem
+         */
+        Hauler.prototype.take = function (creep, creepMem) {
+            var limit = creepMem.sector ? Controllers.sector.getSector(creepMem.sector).getMemory(creep.room).resources.energy : 0;
+            switch (creepMem.takeFrom) {
+                case HaulerTakeFrom.Creep:
+                    var targetCreep = Game.creeps[creepMem.takeFromID];
+                    if (!targetCreep) {
+                        Util.logError("Hauler.take: Target creep no longer exists (probably died)");
+                        delete creepMem.takeFromID;
+                        creepMem.state = HaulerState.Idle;
+                        break;
+                    }
+                    var transferAmount = Math.min(targetCreep.carry[creepMem.carryType], creep.carryCapacity - creep.carry[creepMem.carryType]);
+                    if (limit > 0 && transferAmount > limit) {
+                        transferAmount = limit;
+                    }
+                    var err = targetCreep.transfer(creep, creepMem.carryType, transferAmount);
+                    switch (err) {
+                        case OK:
+                        case ERR_NOT_ENOUGH_RESOURCES:
+                        case ERR_FULL:
+                            break;
+                        default:
+                            Util.logError("Hauler.take: creep.transfer returned unhandled error code '" + err + "'");
+                            creepMem.state = HaulerState.Idle;
+                    }
+                    break;
+            }
+        };
+        /**
+         * Makes the specified hauler attempt to give resources.
+         * @param creep
+         * @param creepMem
+         */
+        Hauler.prototype.give = function (creep, creepMem, targetX, targetY) {
+            switch (creepMem.giveTo) {
+                case HaulerGiveTo.Storage:
+                    var targetStruct = creep.room.lookForAt("structure", targetX, targetY)[0];
+                    if (targetStruct != null) {
+                        var err = creep.transfer(targetStruct, creepMem.carryType);
+                        switch (err) {
+                            case OK:
+                            case ERR_NOT_ENOUGH_RESOURCES:
+                            case ERR_FULL:
+                                break;
+                            default:
+                                Util.logError("Hauler.give: creep.transfer returned unhandled error code '" + err + "'");
+                                creepMem.state = HaulerState.Idle;
+                        }
+                    }
+                    break;
+            }
+        };
+        return Hauler;
+    }(Roles.Base));
+    Roles.Hauler = Hauler;
+    Roles.register(new Hauler());
+    var _a;
+})(Roles || (Roles = {}));
+/// <reference path="../Util.ts" />
+/// <reference path="Base.ts" />
+var Roles;
+(function (Roles) {
+    /** State that a miner can be in. */
+    var MinerState;
+    (function (MinerState) {
+        /** Miner is awaiting work. Default state. */
+        MinerState[MinerState["Idle"] = 0] = "Idle";
+        /** Miner is following a path to a mining point. */
+        MinerState[MinerState["PathingToMinePoint"] = 1] = "PathingToMinePoint";
+        /** Miner is mining. */
+        MinerState[MinerState["Mining"] = 2] = "Mining";
+    })(MinerState || (MinerState = {}));
+    var Miner = (function (_super) {
+        __extends(Miner, _super);
+        function Miner() {
+            _super.call(this);
+            this._name = "miner";
+            this._bodies = [
+                [WORK, CARRY, MOVE]
+            ];
+        }
+        /**
+         * Runs role logic for one creep.
+         * @param creep
+        **/
+        Miner.prototype.run = function (creep) {
+            var mem = creep.memory;
+            var moveCode;
+            var mineTarget = mem.mineTargetID && Game.getObjectById(mem.mineTargetID);
+            // Switch on creep state
+            switch (mem.state || MinerState.Idle) {
+                case MinerState.Idle:
+                    if (mineTarget != null) {
+                        mem.path = creep.room.findPath(creep.pos, mineTarget.pos);
+                        mem.path.pop(); // don't actually step onto the target tile
+                        mem.state = MinerState.PathingToMinePoint;
+                        mem.pathTarget = { x: mineTarget.pos.x, y: mineTarget.pos.y };
+                    }
+                    break;
+                case MinerState.PathingToMinePoint:
+                    // See if we're at destination
+                    moveCode = Util.followPath(creep, 1);
+                    switch (moveCode) {
+                        case Util.FollowPathStatus.Ok:
+                            break;
+                        case Util.FollowPathStatus.Finished:
+                            // Clean up path
+                            delete mem.path;
+                            delete mem.pathTarget;
+                            // Start mining!
+                            mem.state = MinerState.Mining;
+                            break;
+                        default:
+                            mem.state = MinerState.Idle;
+                            delete mem.path;
+                            delete mem.pathTarget;
+                            break;
+                    }
+                    break;
+                case MinerState.Mining:
+                    if (mineTarget == null) {
+                        Util.logError("Miner.run: Mining target is null somehow");
+                        mem.state = MinerState.Idle;
+                        delete mem.mineTargetID;
+                    }
+                    else {
+                        var err = creep.harvest(mineTarget);
+                        switch (err) {
+                            case OK:
+                            case ERR_NOT_ENOUGH_RESOURCES:
+                                break;
+                            default:
+                                Util.logError("Miner.run: creep.harvest returned unhandled error code '" + err + "'");
+                                mem.state = MinerState.Idle;
+                                break;
+                        }
+                    }
+                    break;
+            }
+        };
+        return Miner;
+    }(Roles.Base));
+    Roles.Miner = Miner;
+    Roles.register(new Miner());
+})(Roles || (Roles = {}));
+/// <reference path="../Util.ts" />
+/// <reference path="Base.ts" />
+/// <reference path="../Roles/Hauler.ts" />
+/// <reference path="../Roles/Miner.ts" />
 var Sectors;
 (function (Sectors) {
-    var EconomySector = (function (_super) {
-        __extends(EconomySector, _super);
-        /**
-         * The economy sector is responsible for mining energy sources and transporting the energy back to storage.
-         * It's job is to maintain the maximum number of "sourceminer" creeps that a room can sustain.
-         * It should also create and maintain a "hauler" creep that is paired to each "miner" creep.
-        **/
-        function EconomySector() {
+    var Economy = (function (_super) {
+        __extends(Economy, _super);
+        function Economy() {
             _super.call(this, "economy");
         }
         /**
@@ -427,7 +818,7 @@ var Sectors;
          * If it doesn't exist, it will be created.
          * @param room      Room reference or name.
          */
-        EconomySector.prototype.getMemory = function (room) {
+        Economy.prototype.getMemory = function (room) {
             return _super.prototype.getMemory.call(this, room);
         };
         /**
@@ -435,25 +826,94 @@ var Sectors;
          * @param room
          * @param mem
          */
-        EconomySector.prototype.onCreated = function (room, mem) {
+        Economy.prototype.onCreated = function (room, mem) {
+            mem.curSpawn = -1;
         };
         /**
          * Runs a logic update tick for the given room.
          * @param room
          */
-        EconomySector.prototype.tick = function (room) {
+        Economy.prototype.tick = function (room) {
+            var _this = this;
+            // Cache creeps
+            this._creeps = this.getCreeps(room);
+            // Run spawn logic
+            var mem = this.getMemory(room);
+            if (mem.curSpawn >= 0) {
+                if (!Controllers.spawn.spawnRequestValid(mem.curSpawn)) {
+                    this.log("Request ID " + mem.curSpawn + " is now invalid");
+                    mem.curSpawn = -1;
+                }
+            }
+            else {
+                mem.curSpawn = this.runSpawnLogic(room);
+                this.log("Request ID is now " + mem.curSpawn);
+            }
+            // Check assignments
+            for (var i = 0; i < this._creeps.length; i++) {
+                var creep = this._creeps[i];
+                var creepMem = creep.memory;
+                switch (creepMem.role) {
+                    case "miner":
+                        var minerMem = creep.memory;
+                        if (minerMem.mineTargetID == null) {
+                            // Assign to source
+                            minerMem.mineType = RESOURCE_ENERGY;
+                            minerMem.mineTargetID = this.allocateSource(creep).id;
+                        }
+                        break;
+                    case "hauler":
+                        var haulerMem = creep.memory;
+                        if (haulerMem.takeFromID == null) {
+                            haulerMem.carryType = RESOURCE_ENERGY;
+                            haulerMem.carryBehaviour = Roles.HaulerCarryBehaviour.WaitUntilFull;
+                            haulerMem.takeFrom = Roles.HaulerTakeFrom.Creep;
+                            var haulerTarget = this._creeps.filter(function (c) { return c.memory["role"] === "miner" && !_this._creeps.some(function (c2) { return c2.memory["takeFromID"] === c.id; }); })[0];
+                            haulerMem.takeFromID = haulerTarget && haulerTarget.id;
+                            haulerMem.giveTo = Roles.HaulerGiveTo.Storage;
+                        }
+                        break;
+                }
+            }
+        };
+        Economy.prototype.runSpawnLogic = function (room) {
             // Get all creeps for this room
-            var creeps = this.getCreeps(room);
-            var miners = creeps.filter(function (c) { return c.memory.role === "sourceminer"; });
+            var creeps = this._creeps;
+            var miners = creeps.filter(function (c) { return c.memory.role === "miner"; });
             var haulers = creeps.filter(function (c) { return c.memory.role === "hauler"; });
-            // If there are less haulers then miners, we should spawn one and assign it to whichever miner
+            // If there are less haulers then miners, we should spawn one
+            if (haulers.length < miners.length) {
+                this.log("Spawning hauler");
+                var haulerCost = Roles.get("hauler").getCreepSpawnCost();
+                this.requestEnergy(room, haulerCost);
+                return Controllers.spawn.requestSpawnCreep(this, room, Roles.get("hauler"));
+            }
             // Get all sources
             var roomMem = room.memory;
             var totalMinerCount = roomMem.sources.map(function (s) { return s.workersMax; }).reduce(function (a, b) { return a + b; });
+            // If there are less miners than the sources can support, spawn one
+            if (miners.length < totalMinerCount) {
+                this.log("Spawning miner");
+                var minerCost = Roles.get("miner").getCreepSpawnCost();
+                this.requestEnergy(room, minerCost);
+                return Controllers.spawn.requestSpawnCreep(this, room, Roles.get("miner"));
+            }
+            return -1;
         };
-        return EconomySector;
+        Economy.prototype.allocateSource = function (creep) {
+            var roomMem = creep.room.memory;
+            for (var i = 0; i < roomMem.sources.length; i++) {
+                var src = roomMem.sources[i];
+                src.currentWorkers = src.currentWorkers.filter(function (cname) { return Game.creeps[cname] != null; }); // clean up dead workers
+                if (src.currentWorkers.length < src.workersMax) {
+                    src.currentWorkers.push(creep.name);
+                    return Game.getObjectById(src.name);
+                }
+            }
+        };
+        return Economy;
     }(Sectors.Base));
-    Sectors.EconomySector = EconomySector;
+    Sectors.Economy = Economy;
 })(Sectors || (Sectors = {}));
 /// <reference path="Util.ts" />
 /// <reference path="Roles/Base.ts" />
@@ -465,6 +925,7 @@ var profiler = require('./screeps-profiler');
 var debugmode = false;
 if (debugmode)
     profiler.enable();
+Controllers.sector.registerSector(Sectors.Economy, 100);
 var Main;
 (function (Main) {
     /**
@@ -490,12 +951,18 @@ var Main;
                 // Get memory and role
                 var mem = creep.memory;
                 var role = Roles.get(mem.role);
+                // Any creeps stranded without a sector should be destroyed
+                if (mem.sector == null) {
+                    console.log(creep.name + ": No assigned sector, suiciding");
+                    creep.suicide();
+                    continue;
+                }
                 // Tick
                 if (role) {
                     role.run(creep);
                 }
                 else {
-                    console.log(creep.name + " Unknown role " + mem.role);
+                    console.log(creep.name + ": Unknown role " + mem.role);
                 }
             }
         }
@@ -511,7 +978,7 @@ var Roles;
         function Builder() {
             _super.call(this);
             this._name = "builder";
-            this.bodies = [
+            this._bodies = [
                 [WORK, CARRY, MOVE]
             ];
         }
@@ -580,7 +1047,7 @@ var Roles;
         function ControllerFeeder() {
             _super.call(this);
             this._name = "cfeeder";
-            this.bodies = [
+            this._bodies = [
                 [WORK, CARRY, MOVE]
             ];
         }
@@ -624,67 +1091,12 @@ var Roles;
 /// <reference path="Base.ts" />
 var Roles;
 (function (Roles) {
-    var Hauler = (function (_super) {
-        __extends(Hauler, _super);
-        function Hauler() {
-            _super.call(this);
-            this._name = "hauler";
-            this.bodies = [
-                [WORK, CARRY, MOVE]
-            ];
-        }
-        /**
-         * Runs role logic for one creep.
-         * @param creep
-        **/
-        Hauler.prototype.run = function (creep) {
-            var energyresource = Util.quickFindAny(creep, FIND_DROPPED_RESOURCES, "transportsource", {
-                filter: { resourceType: RESOURCE_ENERGY }
-            });
-            if (creep.carry.energy <= 0 && !energyresource)
-                return;
-            if (creep.carry.energy < creep.carryCapacity && energyresource) {
-                if (creep.pickup(energyresource) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(energyresource);
-                }
-            }
-            else {
-                var spawndropsite = Util.quickFindAny(creep, FIND_MY_SPAWNS, "transportspawn");
-                if (!spawndropsite)
-                    return;
-                if (spawndropsite.energy >= spawndropsite.energyCapacity) {
-                    // Need lodash.sum for structure.store
-                    // ((structure.structureType == STRUCTURE_STORAGE || structure.structuretype == STRUCTURE_CONTAINER) && structure.store < structure.storeCapacity)
-                    var dropsite = Util.quickFindAny(creep, FIND_MY_STRUCTURES, "transportdropsite", {
-                        filter: function (structure) {
-                            return (structure.structureType == STRUCTURE_EXTENSION && structure.energy < structure.energyCapacity) ||
-                                ((structure.structureType == STRUCTURE_STORAGE || structure.structuretype == STRUCTURE_CONTAINER) && structure.store.energy < structure.storeCapacity);
-                        }
-                    });
-                    if (creep.transfer(dropsite, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                        creep.moveTo(dropsite);
-                    }
-                }
-                else if (creep.transfer(spawndropsite, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(spawndropsite);
-                }
-            }
-        };
-        return Hauler;
-    }(Roles.Base));
-    Roles.Hauler = Hauler;
-    Roles.register(new Hauler());
-})(Roles || (Roles = {}));
-/// <reference path="../Util.ts" />
-/// <reference path="Base.ts" />
-var Roles;
-(function (Roles) {
     var Scout = (function (_super) {
         __extends(Scout, _super);
         function Scout() {
             _super.call(this);
             this._name = "scout";
-            this.bodies = [
+            this._bodies = [
                 [MOVE, MOVE, MOVE]
             ];
         }
@@ -717,58 +1129,4 @@ var Roles;
     }(Roles.Base));
     Roles.Scout = Scout;
     Roles.register(new Scout());
-})(Roles || (Roles = {}));
-/// <reference path="../Util.ts" />
-/// <reference path="Base.ts" />
-var Roles;
-(function (Roles) {
-    var SourceMiner = (function (_super) {
-        __extends(SourceMiner, _super);
-        function SourceMiner() {
-            _super.call(this);
-            this._name = "sourceminer";
-            this.bodies = [
-                [WORK, CARRY, MOVE]
-            ];
-        }
-        /**
-         * Runs role logic for one creep.
-         * @param creep
-        **/
-        SourceMiner.prototype.run = function (creep) {
-            var roommemory = creep.room.memory;
-            var minermemory = creep.memory;
-            if (roommemory.noSources || !roommemory.sources)
-                return;
-            if (minermemory.source) {
-                var source = Game.getObjectById(minermemory.source);
-                if (source && creep.harvest(source) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(source);
-                }
-                return;
-            }
-            else {
-                // if we didn't find a source to mine sleep for 100 ticks
-                if (minermemory.findSleepTime > 0) {
-                    minermemory.findSleepTime--;
-                    return;
-                }
-                for (var i = 0; i < roommemory.sources.length; i++) {
-                    var source = roommemory.sources[i];
-                    for (var j = 0; j < source.workersMax; j++) {
-                        var worker = source.currentWorkers[j];
-                        if (!worker || !Game.getObjectById(worker)) {
-                            source.currentWorkers[j] = creep.id;
-                            minermemory.source = source.name;
-                            return;
-                        }
-                    }
-                }
-                minermemory.findSleepTime = 100;
-            }
-        };
-        return SourceMiner;
-    }(Roles.Base));
-    Roles.SourceMiner = SourceMiner;
-    Roles.register(new SourceMiner());
 })(Roles || (Roles = {}));

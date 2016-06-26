@@ -27,7 +27,7 @@ module Roles {
             super();
 
             this._name = "miner";
-            this.bodies = [
+            this._bodies = [
                 [WORK, CARRY, MOVE]
             ];
         }
@@ -57,7 +57,7 @@ module Roles {
                 case MinerState.PathingToMinePoint:
 
                     // See if we're at destination
-                    moveCode = Util.followPath(creep);
+                    moveCode = Util.followPath(creep, 1);
                     switch (moveCode) {
                         case Util.FollowPathStatus.Ok:
                             break;
@@ -68,10 +68,12 @@ module Roles {
 
                             // Start mining!
                             mem.state = MinerState.Mining;
+                            break;
                         default:
                             mem.state = MinerState.Idle;
                             delete mem.path;
                             delete mem.pathTarget;
+                            break;
                     }
                     break;
 
@@ -85,6 +87,7 @@ module Roles {
                     else {
                         const err = creep.harvest(<Source|Mineral>mineTarget);
                         switch (err) {
+                            case OK:
                             case ERR_NOT_ENOUGH_RESOURCES:
                                 break;
                             default:

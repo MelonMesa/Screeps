@@ -15,6 +15,8 @@ var debugmode = false;
 if (debugmode)
     profiler.enable();
 
+Controllers.sector.registerSector(Sectors.Economy, 100);
+
 module Main {
     /**
      * Main game loop.
@@ -41,11 +43,18 @@ module Main {
                 const mem: Util.CreepMemory = creep.memory;
                 const role = Roles.get(mem.role);
 
+                // Any creeps stranded without a sector should be destroyed
+                if (mem.sector == null) {
+                    console.log(`${creep.name}: No assigned sector, suiciding`);
+                    creep.suicide();
+                    continue;
+                }
+
                 // Tick
                 if (role) {
                     role.run(creep);
                 } else {
-                    console.log(`${creep.name} Unknown role ${mem.role}`);
+                    console.log(`${creep.name}: Unknown role ${mem.role}`);
                 }
             }
         }

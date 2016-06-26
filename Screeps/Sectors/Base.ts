@@ -22,7 +22,6 @@ module Sectors {
     export abstract class Base {
 
         protected _name: string;
-        protected _memory: { [roomID: string]: SectorMemory };
 
         /** Gets the name of this sector. */
         public get name() {
@@ -35,10 +34,6 @@ module Sectors {
          */
         constructor(name: string) {
             this._name = name;
-
-            // Get memory
-            const sectors = Memory["sectors"] || (Memory["sectors"] = {});
-            this._memory = sectors[name] || (sectors[name] = {});
         }
 
         /**
@@ -48,9 +43,11 @@ module Sectors {
          */
         public getMemory(room: string | Room): SectorMemory {
             const roomID = (typeof room === "string") ? room : room.name;
-            var mem: SectorMemory;
-            if (mem = this._memory[roomID]) { return mem; }
-            this.onCreated(typeof room === "string" ? Game.rooms[room] : room, mem = this._memory[roomID] = {
+            const root = Memory["sectors"] || (Memory["sectors"] = {});
+            const sectorRoot = root[this._name] || (root[this._name] = {});
+            var mem = sectorRoot[roomID];
+            if (mem) { return mem; }
+            this.onCreated(typeof room === "string" ? Game.rooms[room] : room, mem = sectorRoot[roomID] = {
                 resources: {
                     energy: 0
                 },
@@ -98,11 +95,19 @@ module Sectors {
             const arr: Creep[] = [];
             for (var key in Game.creeps) {
                 const creep = Game.creeps[key];
-                if ((<Util.CreepMemory>creep.memory).sector === this._name && (creep.room === room || creep.room.name === room)) {
+                if ((<Util.CreepMemory>creep.memory).sector === this._name && (creep.room === room || creep.room.name === room) && creep.my) {
                     arr.push(creep);
                 }
             }
             return arr;
+        }
+
+        /**
+         * Logs a debug message.
+         * @param message
+         */
+        protected log(message: string): void {
+            console.log(`${this._name}: ${message}`);
         }
 
         /**

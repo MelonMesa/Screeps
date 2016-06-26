@@ -44,6 +44,21 @@ module Controllers {
             return mem.nextRequestID++;
         }
 
+        /**
+         * Gets if the specified spawn request is still in the spawn queue.
+         * @param requestID
+         */
+        public spawnRequestValid(requestID: number): boolean {
+            return this.getMemory().buildQueue.some(r => r.requestID === requestID);
+        }
+
+        /**
+         * Resets the spawn queue.
+         */
+        public reset(): void {
+            this.getMemory().buildQueue.length = 0;
+        }
+
         public run() {
             const memory = this.getMemory();
 
@@ -68,15 +83,18 @@ module Controllers {
                             if (err === OK) {
                                 const creepMem: Util.CreepMemory = {
                                     role: request.roleName,
-                                    sector: request.sectorName
+                                    sector: request.sectorName,
+                                    path: null,
+                                    pathTarget: null
                                 };
                                 err = spawn.createCreep(body, undefined, creepMem);
-                                if (err !== OK) {
+                                if (err !== OK && typeof(err) !== "string") {
                                     Util.logError(`Got error code ${err} when spawning creep '${request.roleName}' for sector '${request.sectorName}', even though it passed canCreateCreep check`);
                                 }
                                 memory.buildQueue.splice(i, 1);
                                 i--;
-                            } else {
+                                sector.getMemory(room).resources.energy -= role.getCreepSpawnCost(request.level);
+                            } else if (err !== ERR_NOT_ENOUGH_ENERGY) {
                                 Util.logError(`Got error code ${err} when checking if it's OK to spawn creep '${request.roleName}' for sector '${request.sectorName}'`);
                             }
                         }

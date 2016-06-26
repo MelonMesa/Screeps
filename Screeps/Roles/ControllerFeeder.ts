@@ -7,7 +7,7 @@ module Roles {
             super();
 
             this._name = "cfeeder";
-            this.bodies = [
+            this._bodies = [
                 [WORK, CARRY, MOVE]
             ];
         }

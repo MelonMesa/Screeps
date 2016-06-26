@@ -102,7 +102,7 @@ module Controllers {
                     const alloc = Math.floor(Math.min(energyLeft * (request.priority / rollingSumPriority), request.amount));
                     if (alloc <= 0) break;
                     const mem = request.sector.getMemory(room);
-                    console.log(`Allocated ${alloc} energy to ${request.sector.name}, fulfilling ${(alloc === request.amount) ? "the entire request" : `some of the requested ${request.amount}`}`);
+                    //console.log(`Allocated ${alloc} energy to ${request.sector.name}, fulfilling ${(alloc === request.amount) ? "the entire request" : `some of the requested ${request.amount}`}`);
                     mem.requestedResources.energy -= alloc;
                     mem.resources.energy += alloc;
                     energyLeft -= alloc;
@@ -112,6 +112,7 @@ module Controllers {
             // Tick sectors
             for (var key in this._sectorMap) {
                 const sector = this._sectorMap[key];
+                // console.log(`Tick sector '${key}' in room '${room.name}'`);
                 sector.sector.tick(room);
             }
         }

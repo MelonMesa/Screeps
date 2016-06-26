@@ -67,7 +67,7 @@ module Roles {
             super();
 
             this._name = "hauler";
-            this.bodies = [
+            this._bodies = [
                 [WORK, CARRY, MOVE]
             ];
         }
@@ -97,7 +97,7 @@ module Roles {
                 case HaulerState.PathingToPickup:
 
                     // See if we're at destination
-                    moveCode = Util.followPath(creep);
+                    moveCode = Util.followPath(creep, 1);
                     switch (moveCode) {
                         case Util.FollowPathStatus.Ok:
                             break;
@@ -144,7 +144,7 @@ module Roles {
                 case HaulerState.PathingToDropoff:
 
                     // See if we're at destination
-                    moveCode = Util.followPath(creep);
+                    moveCode = Util.followPath(creep, 1);
                     switch (moveCode) {
                         case Util.FollowPathStatus.Ok:
                             break;

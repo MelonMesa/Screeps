@@ -11,7 +11,7 @@ module Roles {
             super();
 
             this._name = "scout";
-            this.bodies = [
+            this._bodies = [
                 [MOVE, MOVE, MOVE]
             ];
         }
