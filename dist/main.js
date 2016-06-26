@@ -491,7 +491,6 @@ var Roles;
     })(Roles.HaulerCarryBehaviour || (Roles.HaulerCarryBehaviour = {}));
     var HaulerCarryBehaviour = Roles.HaulerCarryBehaviour;
     /** State that a hauler can be in. */
-    var HaulerState;
     (function (HaulerState) {
         /** Hauler is awaiting work. Default state. */
         HaulerState[HaulerState["Idle"] = 0] = "Idle";
@@ -501,7 +500,8 @@ var Roles;
         HaulerState[HaulerState["Collecting"] = 2] = "Collecting";
         /** Hauler is following a path to a resource drop-off point. */
         HaulerState[HaulerState["PathingToDropoff"] = 3] = "PathingToDropoff";
-    })(HaulerState || (HaulerState = {}));
+    })(Roles.HaulerState || (Roles.HaulerState = {}));
+    var HaulerState = Roles.HaulerState;
     /**
      * How to prioritise energy drop-off structures.
      * Lower values are picked first.
@@ -676,6 +676,10 @@ var Roles;
                             case OK:
                             case ERR_FULL:
                                 break;
+                            case ERR_NOT_IN_RANGE:
+                                // Can happen under normal circumstances
+                                creepMem.state = HaulerState.Idle;
+                                break;
                             default:
                                 Util.logError("Hauler.take: creep.pickup returned unhandled error code '" + err + "'");
                                 break;
@@ -740,7 +744,6 @@ var Roles;
 var Roles;
 (function (Roles) {
     /** State that a miner can be in. */
-    var MinerState;
     (function (MinerState) {
         /** Miner is awaiting work. Default state. */
         MinerState[MinerState["Idle"] = 0] = "Idle";
@@ -748,7 +751,8 @@ var Roles;
         MinerState[MinerState["PathingToMinePoint"] = 1] = "PathingToMinePoint";
         /** Miner is mining. */
         MinerState[MinerState["Mining"] = 2] = "Mining";
-    })(MinerState || (MinerState = {}));
+    })(Roles.MinerState || (Roles.MinerState = {}));
+    var MinerState = Roles.MinerState;
     var Miner = (function (_super) {
         __extends(Miner, _super);
         function Miner() {
@@ -887,9 +891,11 @@ var Sectors;
                             haulerMem.carryType = RESOURCE_ENERGY;
                             haulerMem.carryBehaviour = Roles.HaulerCarryBehaviour.WaitUntilFull;
                             haulerMem.takeFrom = Roles.HaulerTakeFrom.Creep;
-                            var haulerTarget = this._creeps.filter(function (c) { return c.memory["role"] === "miner" && !c.spawning && !_this._creeps.some(function (c2) { return c2.memory["takeFromID"] === c.name; }); })[0];
-                            this.log("Assigning hauler '" + creep.name + "' to miner '" + (haulerTarget && haulerTarget.name) + "'");
-                            haulerMem.takeFromID = haulerTarget && haulerTarget.name;
+                            var haulerTarget = this._creeps.filter(function (c) { return c.memory["role"] === "miner" && !c.spawning && c.memory["state"] === Roles.MinerState.Mining && !_this._creeps.some(function (c2) { return c2.memory["takeFromID"] === c.name; }); })[0];
+                            if (haulerTarget) {
+                                this.log("Assigning hauler '" + creep.name + "' to miner '" + haulerTarget.name + "'");
+                                haulerMem.takeFromID = haulerTarget.name;
+                            }
                             haulerMem.giveTo = Roles.HaulerGiveTo.Storage;
                         }
                         break;

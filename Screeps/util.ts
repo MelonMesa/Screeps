@@ -9,9 +9,11 @@
         sector: string;
 
         /** Current path. */
-        path: PathStep[];
+        path?: PathStep[];
         /** Current path target. */
-        pathTarget: { x: number, y: number };
+        pathTarget?: { x: number, y: number };
+        /** Number of ticks path has been blocked for. */
+        pathBlock?: number;
     }
 
     /**

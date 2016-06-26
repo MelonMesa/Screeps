@@ -4,7 +4,7 @@
 module Roles {
 
     /** State that a miner can be in. */
-    enum MinerState {
+    export enum MinerState {
         /** Miner is awaiting work. Default state. */
         Idle,
 

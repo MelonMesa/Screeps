@@ -22,7 +22,7 @@ module Roles {
     }
 
     /** State that a hauler can be in. */
-    enum HaulerState {
+    export enum HaulerState {
         /** Hauler is awaiting work. Default state. */
         Idle,
 
@@ -242,6 +242,10 @@ module Roles {
                         switch (err) {
                             case OK:
                             case ERR_FULL:
+                                break;
+                            case ERR_NOT_IN_RANGE:
+                                // Can happen under normal circumstances
+                                creepMem.state = HaulerState.Idle;
                                 break;
                             default:
                                 Util.logError(`Hauler.take: creep.pickup returned unhandled error code '${err}'`);

@@ -83,9 +83,11 @@ module Sectors {
                             haulerMem.carryType = RESOURCE_ENERGY;
                             haulerMem.carryBehaviour = Roles.HaulerCarryBehaviour.WaitUntilFull;
                             haulerMem.takeFrom = Roles.HaulerTakeFrom.Creep;
-                            const haulerTarget = this._creeps.filter(c => c.memory["role"] === "miner" && !c.spawning && !this._creeps.some(c2 => c2.memory["takeFromID"] === c.name))[0];
-                            this.log(`Assigning hauler '${creep.name}' to miner '${haulerTarget && haulerTarget.name}'`);
-                            haulerMem.takeFromID = haulerTarget && haulerTarget.name;
+                            const haulerTarget = this._creeps.filter(c => c.memory["role"] === "miner" && !c.spawning && c.memory["state"] === Roles.MinerState.Mining && !this._creeps.some(c2 => c2.memory["takeFromID"] === c.name))[0];
+                            if (haulerTarget) {
+                                this.log(`Assigning hauler '${creep.name}' to miner '${haulerTarget.name}'`);
+                                haulerMem.takeFromID = haulerTarget.name;
+                            }
                             haulerMem.giveTo = Roles.HaulerGiveTo.Storage;
                         }
                         break;
