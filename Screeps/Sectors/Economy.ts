@@ -56,12 +56,12 @@ module Sectors {
             const mem = this.getMemory(room);
             if (mem.curSpawn >= 0) {
                 if (!Controllers.spawn.spawnRequestValid(mem.curSpawn)) {
-                    this.log(`Request ID ${mem.curSpawn} is now invalid`);
+                    // this.log(`Request ID ${mem.curSpawn} is now invalid`);
                     mem.curSpawn = -1;
                 }
             } else {
                 mem.curSpawn = this.runSpawnLogic(room);
-                this.log(`Request ID is now ${mem.curSpawn}`);
+                // this.log(`Request ID is now ${mem.curSpawn}`);
             }
 
             // Check assignments
@@ -83,8 +83,9 @@ module Sectors {
                             haulerMem.carryType = RESOURCE_ENERGY;
                             haulerMem.carryBehaviour = Roles.HaulerCarryBehaviour.WaitUntilFull;
                             haulerMem.takeFrom = Roles.HaulerTakeFrom.Creep;
-                            const haulerTarget = this._creeps.filter(c => c.memory["role"] === "miner" && !this._creeps.some(c2 => c2.memory["takeFromID"] === c.id))[0];
-                            haulerMem.takeFromID = haulerTarget && haulerTarget.id;
+                            const haulerTarget = this._creeps.filter(c => c.memory["role"] === "miner" && !c.spawning && !this._creeps.some(c2 => c2.memory["takeFromID"] === c.name))[0];
+                            this.log(`Assigning hauler '${creep.name}' to miner '${haulerTarget && haulerTarget.name}'`);
+                            haulerMem.takeFromID = haulerTarget && haulerTarget.name;
                             haulerMem.giveTo = Roles.HaulerGiveTo.Storage;
                         }
                         break;

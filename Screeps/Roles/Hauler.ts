@@ -235,17 +235,38 @@ module Roles {
                         break;
                     }
 
+                    // look for any dropped resource on the ground
+                    const droppedRes = creep.room.lookForAt<Energy>("energy", targetCreep.pos)[0];
+                    if (droppedRes != null) {
+                        const err = creep.pickup(droppedRes);
+                        switch (err) {
+                            case OK:
+                            case ERR_FULL:
+                                break;
+                            default:
+                                Util.logError(`Hauler.take: creep.pickup returned unhandled error code '${err}'`);
+                                break;
+                        }
+                    }
+
                     var transferAmount = Math.min(targetCreep.carry[creepMem.carryType], creep.carryCapacity - creep.carry[creepMem.carryType]);
                     if (limit > 0 && transferAmount > limit) { transferAmount = limit; }
-                    const err = targetCreep.transfer(creep, creepMem.carryType, transferAmount);
-                    switch (err) {
-                        case OK:
-                        case ERR_NOT_ENOUGH_RESOURCES:
-                        case ERR_FULL:
-                            break;
-                        default:
-                            Util.logError(`Hauler.take: creep.transfer returned unhandled error code '${err}'`);
-                            creepMem.state = HaulerState.Idle;
+                    if (transferAmount > 0) {
+                        const err = targetCreep.transfer(creep, creepMem.carryType, transferAmount);
+                        switch (err) {
+                            case OK:
+                            case ERR_NOT_ENOUGH_RESOURCES:
+                            case ERR_FULL:
+                                break;
+                            case ERR_NOT_IN_RANGE:
+                                // Can happen under normal circumstances
+                                creepMem.state = HaulerState.Idle;
+                                break;
+                            default:
+                                Util.logError(`Hauler.take: creep.transfer returned unhandled error code '${err}'`);
+                                creepMem.state = HaulerState.Idle;
+                                break;
+                        }
                     }
 
                     break;

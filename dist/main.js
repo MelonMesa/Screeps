@@ -668,19 +668,39 @@ var Roles;
                         creepMem.state = HaulerState.Idle;
                         break;
                     }
+                    // look for any dropped resource on the ground
+                    var droppedRes = creep.room.lookForAt("energy", targetCreep.pos)[0];
+                    if (droppedRes != null) {
+                        var err = creep.pickup(droppedRes);
+                        switch (err) {
+                            case OK:
+                            case ERR_FULL:
+                                break;
+                            default:
+                                Util.logError("Hauler.take: creep.pickup returned unhandled error code '" + err + "'");
+                                break;
+                        }
+                    }
                     var transferAmount = Math.min(targetCreep.carry[creepMem.carryType], creep.carryCapacity - creep.carry[creepMem.carryType]);
                     if (limit > 0 && transferAmount > limit) {
                         transferAmount = limit;
                     }
-                    var err = targetCreep.transfer(creep, creepMem.carryType, transferAmount);
-                    switch (err) {
-                        case OK:
-                        case ERR_NOT_ENOUGH_RESOURCES:
-                        case ERR_FULL:
-                            break;
-                        default:
-                            Util.logError("Hauler.take: creep.transfer returned unhandled error code '" + err + "'");
-                            creepMem.state = HaulerState.Idle;
+                    if (transferAmount > 0) {
+                        var err = targetCreep.transfer(creep, creepMem.carryType, transferAmount);
+                        switch (err) {
+                            case OK:
+                            case ERR_NOT_ENOUGH_RESOURCES:
+                            case ERR_FULL:
+                                break;
+                            case ERR_NOT_IN_RANGE:
+                                // Can happen under normal circumstances
+                                creepMem.state = HaulerState.Idle;
+                                break;
+                            default:
+                                Util.logError("Hauler.take: creep.transfer returned unhandled error code '" + err + "'");
+                                creepMem.state = HaulerState.Idle;
+                                break;
+                        }
                     }
                     break;
             }
@@ -841,13 +861,12 @@ var Sectors;
             var mem = this.getMemory(room);
             if (mem.curSpawn >= 0) {
                 if (!Controllers.spawn.spawnRequestValid(mem.curSpawn)) {
-                    this.log("Request ID " + mem.curSpawn + " is now invalid");
+                    // this.log(`Request ID ${mem.curSpawn} is now invalid`);
                     mem.curSpawn = -1;
                 }
             }
             else {
                 mem.curSpawn = this.runSpawnLogic(room);
-                this.log("Request ID is now " + mem.curSpawn);
             }
             // Check assignments
             for (var i = 0; i < this._creeps.length; i++) {
@@ -868,8 +887,9 @@ var Sectors;
                             haulerMem.carryType = RESOURCE_ENERGY;
                             haulerMem.carryBehaviour = Roles.HaulerCarryBehaviour.WaitUntilFull;
                             haulerMem.takeFrom = Roles.HaulerTakeFrom.Creep;
-                            var haulerTarget = this._creeps.filter(function (c) { return c.memory["role"] === "miner" && !_this._creeps.some(function (c2) { return c2.memory["takeFromID"] === c.id; }); })[0];
-                            haulerMem.takeFromID = haulerTarget && haulerTarget.id;
+                            var haulerTarget = this._creeps.filter(function (c) { return c.memory["role"] === "miner" && !c.spawning && !_this._creeps.some(function (c2) { return c2.memory["takeFromID"] === c.name; }); })[0];
+                            this.log("Assigning hauler '" + creep.name + "' to miner '" + (haulerTarget && haulerTarget.name) + "'");
+                            haulerMem.takeFromID = haulerTarget && haulerTarget.name;
                             haulerMem.giveTo = Roles.HaulerGiveTo.Storage;
                         }
                         break;
