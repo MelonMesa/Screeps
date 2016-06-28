@@ -342,14 +342,14 @@ var Controllers;
             // so we hand out the full 200 to economy, and redistribute the 100 to the rest of the requests
             // to resolve this algorithmicly, we're going to sort by priority, allocating higher ones first and adjusting stats as we go
             if (toDistrub > 0) {
-                requests.sort(function (a, b) { return a.priority - b.priority; });
+                requests.sort(function (a, b) { return b.priority - a.priority; });
                 var energyLeft = toDistrub;
                 for (var i = 0; i < requests.length; i++) {
                     if (requests[i].priority <= 0)
                         break;
                     var rollingSumPriority = requests.map(function (r) { return r.priority; }).reduce(function (a, b) { return a + b; });
                     var request = requests.shift();
-                    var alloc = Math.floor(Math.min(energyLeft * (request.priority / rollingSumPriority), request.amount));
+                    var alloc = Math.round(Math.min(energyLeft * (request.priority / rollingSumPriority), request.amount));
                     if (alloc <= 0)
                         break;
                     var mem = request.sector.getMemory(room);
@@ -941,17 +941,73 @@ var Sectors;
     }(Sectors.Base));
     Sectors.Economy = Economy;
 })(Sectors || (Sectors = {}));
+/// <reference path="../Util.ts" />
+/// <reference path="Base.ts" />
+var Sectors;
+(function (Sectors) {
+    var Control = (function (_super) {
+        __extends(Control, _super);
+        /**
+         * The control sector is responsible for feeding the room controller with energy.
+         * It should maintain a single "feeder" creep that hauls energy to the controller and feeds it.
+        **/
+        function Control() {
+            _super.call(this, "control");
+        }
+        /**
+         * Gets sector memory for a specified room.
+         * If it doesn't exist, it will be created.
+         * @param room      Room reference or name.
+         */
+        Control.prototype.getMemory = function (room) {
+            return _super.prototype.getMemory.call(this, room);
+        };
+        /**
+         * Called when sector memory has just been initialised for a room.
+         * @param room
+         * @param mem
+         */
+        Control.prototype.onCreated = function (room, mem) {
+            mem.curSpawn = -1;
+        };
+        /**
+         * Runs a logic update tick for the given room.
+         * @param room
+         */
+        Control.prototype.tick = function (room) {
+            // Cache creeps
+            var creeps = this.getCreeps(room);
+            // Run spawn logic
+            var mem = this.getMemory(room);
+            if (mem.curSpawn >= 0) {
+                if (!Controllers.spawn.spawnRequestValid(mem.curSpawn)) {
+                    mem.curSpawn = -1;
+                }
+            }
+            else if (creeps.length === 0) {
+                this.log("Spawning feeder");
+                var cost = Roles.get("feeder").getCreepSpawnCost();
+                this.requestEnergy(room, cost);
+                mem.curSpawn = Controllers.spawn.requestSpawnCreep(this, room, Roles.get("feeder"));
+            }
+        };
+        return Control;
+    }(Sectors.Base));
+    Sectors.Control = Control;
+})(Sectors || (Sectors = {}));
 /// <reference path="Util.ts" />
 /// <reference path="Roles/Base.ts" />
 /// <reference path="Controllers/Room.ts" />
 /// <reference path="Controllers/Sector.ts" />
 /// <reference path="Controllers/Spawn.ts" />
 /// <reference path="Sectors/Economy.ts" />
+/// <reference path="Sectors/Control.ts" />
 var profiler = require('./screeps-profiler');
 var debugmode = false;
 if (debugmode)
     profiler.enable();
 Controllers.sector.registerSector(Sectors.Economy, 100);
+Controllers.sector.registerSector(Sectors.Control, 50);
 var Main;
 (function (Main) {
     /**
@@ -1066,13 +1122,14 @@ var Roles;
 })(Roles || (Roles = {}));
 /// <reference path="../Util.ts" />
 /// <reference path="Base.ts" />
+/// <reference path="Hauler.ts" />
 var Roles;
 (function (Roles) {
-    var ControllerFeeder = (function (_super) {
-        __extends(ControllerFeeder, _super);
-        function ControllerFeeder() {
+    var Feeder = (function (_super) {
+        __extends(Feeder, _super);
+        function Feeder() {
             _super.call(this);
-            this._name = "cfeeder";
+            this._name = "feeder";
             this._bodies = [
                 [WORK, CARRY, MOVE]
             ];
@@ -1081,7 +1138,9 @@ var Roles;
          * Runs role logic for one creep.
          * @param creep
         **/
-        ControllerFeeder.prototype.run = function (creep) {
+        Feeder.prototype.run = function (creep) {
+            // TODO: Port this to the new pathfinding strategy and fix it up
+            // Maybe extend the Hauler logic instead?
             if (creep.carry.energy > 0) {
                 var controller = creep.room.controller;
                 if (creep.upgradeController(controller) == ERR_NOT_IN_RANGE) {
@@ -1091,7 +1150,13 @@ var Roles;
             else {
                 var pickupsite = Util.quickFindAny(creep, FIND_MY_STRUCTURES, "feederspawn", {
                     filter: function (structure) {
-                        return (structure.structureType == STRUCTURE_EXTENSION && structure.energy > 0);
+                        if (structure.structureType == STRUCTURE_CONTAINER && structure.energy > 0) {
+                            return true;
+                        }
+                        if (structure.structureType == STRUCTURE_STORAGE && structure.store[RESOURCE_ENERGY] > 0) {
+                            return true;
+                        }
+                        return false;
                     }
                 });
                 if (pickupsite) {
@@ -1108,10 +1173,10 @@ var Roles;
                 }
             }
         };
-        return ControllerFeeder;
+        return Feeder;
     }(Roles.Base));
-    Roles.ControllerFeeder = ControllerFeeder;
-    Roles.register(new ControllerFeeder());
+    Roles.Feeder = Feeder;
+    Roles.register(new Feeder());
 })(Roles || (Roles = {}));
 /// <reference path="../Util.ts" />
 /// <reference path="Base.ts" />

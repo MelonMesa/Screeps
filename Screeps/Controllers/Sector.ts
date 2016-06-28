@@ -93,13 +93,13 @@ module Controllers {
             // so we hand out the full 200 to economy, and redistribute the 100 to the rest of the requests
             // to resolve this algorithmicly, we're going to sort by priority, allocating higher ones first and adjusting stats as we go
             if (toDistrub > 0) {
-                requests.sort((a, b) => a.priority - b.priority);
+                requests.sort((a, b) => b.priority - a.priority);
                 var energyLeft = toDistrub;
                 for (var i = 0; i < requests.length; i++) {
                     if (requests[i].priority <= 0) break;
                     const rollingSumPriority = requests.map(r => r.priority).reduce((a, b) => a + b);
                     const request = requests.shift();
-                    const alloc = Math.floor(Math.min(energyLeft * (request.priority / rollingSumPriority), request.amount));
+                    const alloc = Math.round(Math.min(energyLeft * (request.priority / rollingSumPriority), request.amount));
                     if (alloc <= 0) break;
                     const mem = request.sector.getMemory(room);
                     //console.log(`Allocated ${alloc} energy to ${request.sector.name}, fulfilling ${(alloc === request.amount) ? "the entire request" : `some of the requested ${request.amount}`}`);

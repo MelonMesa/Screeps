@@ -7,6 +7,7 @@
 /// <reference path="Controllers/Spawn.ts" />
 
 /// <reference path="Sectors/Economy.ts" />
+/// <reference path="Sectors/Control.ts" />
 
 const profiler = require('./screeps-profiler');
 
@@ -16,6 +17,7 @@ if (debugmode)
     profiler.enable();
 
 Controllers.sector.registerSector(Sectors.Economy, 100);
+Controllers.sector.registerSector(Sectors.Control, 50);
 
 module Main {
     /**

@@ -31,7 +31,7 @@
     <TypeScriptCompile Include="main.ts" />
     <TypeScriptCompile Include="Roles\Base.ts" />
     <TypeScriptCompile Include="Roles\Builder.ts" />
-    <TypeScriptCompile Include="Roles\ControllerFeeder.ts" />
+    <TypeScriptCompile Include="Roles\Feeder.ts" />
     <TypeScriptCompile Include="Roles\Miner.ts" />
     <TypeScriptCompile Include="Roles\Scout.ts" />
     <TypeScriptCompile Include="Roles\Hauler.ts" />
@@ -39,6 +39,7 @@
     <TypeScriptCompile Include="screeps.d.ts" />
     <TypeScriptCompile Include="Controllers\Room.ts" />
     <TypeScriptCompile Include="Sectors\Base.ts" />
+    <TypeScriptCompile Include="Sectors\Control.ts" />
     <TypeScriptCompile Include="Sectors\Economy.ts" />
     <TypeScriptCompile Include="Controllers\Sector.ts" />
     <TypeScriptCompile Include="Controllers\Spawn.ts" />

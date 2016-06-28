@@ -1,12 +1,13 @@
 ﻿/// <reference path="../Util.ts" />
 /// <reference path="Base.ts" />
+/// <reference path="Hauler.ts" />
 
 module Roles {
-    export class ControllerFeeder extends Base {
+    export class Feeder extends Base {
         constructor() {
             super();
 
-            this._name = "cfeeder";
+            this._name = "feeder";
             this._bodies = [
                 [WORK, CARRY, MOVE]
             ];
@@ -17,6 +18,8 @@ module Roles {
          * @param creep
         **/
         public run(creep: Creep): void {
+            // TODO: Port this to the new pathfinding strategy and fix it up
+            // Maybe extend the Hauler logic instead?
             if (creep.carry.energy > 0) {
                 const controller = creep.room.controller;
                 if (creep.upgradeController(controller) == ERR_NOT_IN_RANGE) {
@@ -26,7 +29,13 @@ module Roles {
             else {
                 const pickupsite = Util.quickFindAny<any>(creep, FIND_MY_STRUCTURES, "feederspawn", {
                     filter: (structure) => {
-                        return (structure.structureType == STRUCTURE_EXTENSION && structure.energy > 0);
+                        if (structure.structureType == STRUCTURE_CONTAINER && structure.energy > 0) {
+                            return true;
+                        }
+                        if (structure.structureType == STRUCTURE_STORAGE && structure.store[RESOURCE_ENERGY] > 0) {
+                            return true;
+                        }
+                        return false;
                     }
                 });
 
@@ -47,5 +56,5 @@ module Roles {
         }
     }
 
-    register(new ControllerFeeder());
+    register(new Feeder());
 }
