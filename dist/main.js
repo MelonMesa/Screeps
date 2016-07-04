@@ -328,19 +328,15 @@ var Controllers;
                 var mem = sector_1.sector.getMemory(room);
                 sumRequested += mem.requestedResources.energy;
                 sumTied += mem.resources.energy;
-                requests.push({ sector: sector_1.sector, priority: sector_1.priority, amount: mem.requestedResources.energy });
+                if (mem.requestedResources.energy > 0) {
+                    requests.push({ sector: sector_1.sector, priority: sector_1.priority, amount: mem.requestedResources.energy });
+                }
             }
             var energyPool = energy - sumTied;
             var toDistrub = Math.min(energyPool, sumRequested);
             // so given toDistrub resources to hand out, we need to allocate them among all requests
-            // e.g imagine we have 2 requests for resources:
-            // { sector: "economy", priority: 0.75, amount: 200 }
-            // { sector: "logistics", priority: 0.25, amount: 500 }
-            // imagine we also only have 400 available resource to hand out (total requested is 700, we are missing 300 to fully satisfy all requests)
-            // we should hand all ALL resources, and give 3x as much to economy as logistics
-            // so hand out WOULD be 300 to economy and 100 to logistics, but economy only wants 200
-            // so we hand out the full 200 to economy, and redistribute the 100 to the rest of the requests
-            // to resolve this algorithmicly, we're going to sort by priority, allocating higher ones first and adjusting stats as we go
+            // { sector: "economy", priority: 0.66, amount: 0 }
+            // { sector: "control", priority: 0.33, amount: 200 }
             if (toDistrub > 0) {
                 requests.sort(function (a, b) { return b.priority - a.priority; });
                 var energyLeft = toDistrub;
